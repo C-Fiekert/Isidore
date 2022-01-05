@@ -97,7 +97,41 @@ class Settings:
         self.shodanKey = shodanKey
         self.ipInfoKey = ipInfoKey
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Virustotal key setter
+    def setVirustotalKey(self, key):
+        self.virustotalKey = key
+    
+    # URLScan key setter
+    def setURLScanKey(self, key):
+        self.urlscanKey = key
+    
+    # Hybrid Analysis key setter
+    def setHybridAnalysisKey(self, key):
+        self.hybridAnalysisKey = key
+    
+    # AbuseIPDB key setter
+    def setAbuseIPKey(self, key):
+        self.abuseIPKey = key
+    
+    # Shodan key setter
+    def setShodanKey(self, key):
+        self.shodanKey = key
+    
+    # IPInfo key setter
+    def setIPInfoKey(self, key):
+        self.ipInfoKey = key
+
+    # Update API key in Settings
+    def updateApiKey(self, service, key):
+        if service == "Virustotal":
+            self.setVirustotalKey(key)
+        elif service == "URLScan":
+            self.setURLScanKey(key)
+        elif service == "Hybrid Analysis":
+            self.setHybridAnalysisKey(key)
+        elif service == "AbuseIPDB":
+            self.setAbuseIPKey(key)
+        elif service == "Shodan":
+            self.setShodanKey(key)
+        elif service == "IPInfo":
+            self.setIPInfoKey(key)

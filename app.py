@@ -1,9 +1,12 @@
 # Project Imports
-from flask import Flask
-import webbrowser
+from flask import Flask, request
+from system import Settings
+import os, webbrowser
+
 
 # Defining Flask App
 app = Flask(__name__)
+    
 
 # Instanciates the Flask server and opens the dashboard automatically on localhost
 if __name__ == "__main__":
