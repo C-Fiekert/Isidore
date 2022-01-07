@@ -1,3 +1,5 @@
+import re
+
 # Query Class #######################################################################################################
 class Query:
     
@@ -7,10 +9,13 @@ class Query:
         self.query = query
         self.submissionTime = submissionTime
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Query setter
+    def setQuery(self, query):
+        self.query = query
+
+    # Submission Time setter
+    def setSubmissionTime(self, submissionTime):
+        self.submissionTime = submissionTime
 
 # Domain Query Sub-Class ############################################################################################
 class DomainQuery(Query):
@@ -20,14 +25,25 @@ class DomainQuery(Query):
         self.queryType = queryType
         self.virustotal = virustotal
         self.urlscan = urlscan
-
-        # invoking the __init__ of the Query class 
+        # Invoking the __init__ of the Query class 
         Query.__init__(self, id, query, submissionTime)
+
+    # Query Type setter
+    def setQueryType(self, queryType):
+        self.queryType = queryType
+
+    # Virustotal object setter
+    def setVirustotal(self, virustotal):
+        self.virustotal = virustotal
+
+    # UrlScan object setter
+    def setUrlscan(self, urlscan):
+        self.urlscan = urlscan
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Fixes defanged Domain names
+    def defang(self):
+        # Takes the user query input and validates the Domain format
+        self.query = self.query.replace("[.]", ".")
 
 # File Hash Query Sub-Class #########################################################################################
 class FileHashQuery(Query):
@@ -37,14 +53,20 @@ class FileHashQuery(Query):
         self.queryType = queryType
         self.virustotal = virustotal
         self.hybridAnalysis = hybridAnalysis
-
-        # invoking the __init__ of the Query class 
+        # Invoking the __init__ of the Query class 
         Query.__init__(self, id, query, submissionTime)
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Query Type setter
+    def setQueryType(self, queryType):
+        self.queryType = queryType
+
+    # Virustotal object setter
+    def setVirustotal(self, virustotal):
+        self.virustotal = virustotal
+
+    # Hybrid Analysis object setter
+    def setHybridAnalysis(self, hybridAnalysis):
+        self.hybridAnalysis = hybridAnalysis
 
 # IP Address Query Sub-Class ########################################################################################
 class IPQuery(Query):
@@ -57,14 +79,46 @@ class IPQuery(Query):
         self.greynoise = greynoise
         self.shodan = shodan
         self.ipInfo = ipInfo
-
-        # invoking the __init__ of the Query class 
+        # Invoking the __init__ of the Query class 
         Query.__init__(self, id, query, submissionTime)
+
+    # Query Type setter
+    def setQueryType(self, queryType):
+        self.queryType = queryType
+
+    # Virustotal object setter
+    def setVirustotal(self, virustotal):
+        self.virustotal = virustotal
+
+    # AbuseIP object setter
+    def setAbuseIP(self, abuseIP):
+        self.abuseIP = abuseIP
+
+    # Greynoise object setter
+    def setGreynoise(self, greynoise):
+        self,greynoise = greynoise
+
+    # Shodan object setter
+    def setShodan(self, shodan):
+        self.shodan = shodan
+
+    # IPInfo object setter
+    def setIPInfo(self, ipinfo):
+        self.ipInfo = ipinfo
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Fixes defanged IP Addresses
+    def defang(self):
+        # Takes the user query input and validates the IP Address format
+        self.query = self.query.replace("[.]", ".")
+
+    # Validates IP Addresses
+    def validate(self):
+        # Checks for IP Address formatting
+        match = re.search("^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$", self.query)
+        if match == None:
+            return False
+        else:
+            return True
 
 # Url Query Sub-Class ###############################################################################################
 class UrlQuery(Query):
@@ -75,15 +129,44 @@ class UrlQuery(Query):
         self.virustotal = virustotal
         self.urlscan = urlscan
         self.hybridAnalysis = hybridAnalysis
-
-        # invoking the __init__ of the Query class 
+        # Invoking the __init__ of the Query class 
         Query.__init__(self, id, query, submissionTime)
- 
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
 
+    # Query Type setter
+    def setQueryType(self, queryType):
+        self.queryType = queryType
+
+    # Virustotal object setter
+    def setVirustotal(self, virustotal):
+        self.virustotal = virustotal
+
+    # UrlScan object setter
+    def setUrlscan(self, urlscan):
+        self.urlscan = urlscan
+
+    # Hybrid Analysis object setter
+    def setHybridAnalysis(self, hybridAnalysis):
+        self.hybridAnalysis = hybridAnalysis
+ 
+    # Fixes defanged URLs
+    def defang(self):
+        # Takes the user query input and validates the URL format
+        self.query = self.query.replace("hxxp://", "http://")
+        self.query = self.query.replace("hxxps://", "https://")
+        self.query = self.query.replace("[.]", ".")
+
+    # Validates URLs
+    def validate(self):
+        # Checks for URL prefix
+        match = re.search("^www.|^http://|^https://|^http://www.|^https://www.", self.query)
+        if match == None:
+            self.query = "www." + self.query
+        # Checks for valid URL format
+        match = re.search("https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,}", self.query)
+        if match == None:
+            return False
+        else:
+            return True
 
 # Settings Class ########################################################################################################
 class Settings:
