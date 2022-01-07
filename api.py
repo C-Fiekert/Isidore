@@ -16,10 +16,53 @@ class AbuseIP:
         self.lastReported = lastReported
         self.reportLink = reportLink
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # IP Address setter
+    def setIP(self, ipAddress):
+        self.ipAddress = ipAddress
+
+    # Public IP Address setter
+    def setPublicIP(self, publicIP):
+        self.publicIP = publicIP
+
+    # IP Address Version setter
+    def setIPVersion(self, ipVersion):
+        self.ipVersion =ipVersion
+
+    # Whitelisted IP setter
+    def setWhitelisted(self, whitelisted):
+        self.whitelisted = whitelisted
+
+    # Abuse Confidence setter
+    def setAbuseConfidence(self, abuseConfidence):
+        self.abuseConfidence = abuseConfidence
+
+    # Country setter
+    def setCountry(self, country):
+        self.country = country
+
+    # Usage Type setter
+    def setUsageType(self, usageType):
+        self.usageType = usageType
+
+    # ISP setter
+    def setISP(self, isp):
+        self.isp = isp
+
+    # Domain setter
+    def setDomain(self, domain):
+        self.domain = domain
+
+    # Total Reports setter
+    def setTotalReports(self, totalReports):
+        self.totalReports = totalReports
+
+    # Last Reported setter
+    def setLastReported(self, lastReported):
+        self.lastReported = lastReported
+
+    # Report Link setter
+    def setReportLink(self, reportLink):
+        self.reportLink = reportLink
 
 
 # Greynoise Class ########################################################################################################
@@ -35,10 +78,33 @@ class Greynoise:
         self.lastSeen = lastSeen
         self.reportLink = reportLink
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # IP Address setter
+    def setIP(self, ipAddress):
+        self.ipAddress = ipAddress
+
+    # Noise setter
+    def setNoise(self, noise):
+        self.noise = noise
+
+    # RIOT setter
+    def setRIOT(self, riot):
+        self.riot = riot
+
+    # Verdict setter
+    def setVerdict(self, verdict):
+        self.verdict = verdict
+
+    # Name setter
+    def setName(self, name):
+        self.name = name
+
+    # Last Seen setter
+    def setLastSeen(self, lastSeen):
+        self.lastSeen = lastSeen
+
+    # Report Link setter
+    def setReportLink(self, reportLink):
+        self.reportLink = reportLink
 
 
 # Hybrid Analysis Class ##################################################################################################
@@ -50,10 +116,17 @@ class HybridAnalysis:
         self.verdict = verdict
         self.analysisTime = analysisTime
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Submission Name setter
+    def setSubmissionName(self, submissionName):
+        self.submissionName = submissionName
+
+    # Verdict setter
+    def setVerdict(self, verdict):
+        self.verdict = verdict
+
+    # Analysis Time setter
+    def setAnalysisTime(self, analysisTime):
+        self.analysisTime = analysisTime
 
 
 # IPinfo Class ###########################################################################################################
@@ -72,10 +145,45 @@ class IPinfo:
         self.latitude = latitude
         self.longitude = longitude
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # IP Address setter
+    def setIP(self, ipAddress):
+        self.ipAddress = ipAddress
+
+    # Host Name setter
+    def setHostName(self, hostname):
+        self.hostName = hostname
+
+    # City setter
+    def setCity(self, city):
+        self.city = city
+
+    # Region setter
+    def setRegion(self, region):
+        self.region = region
+
+    # Country setter
+    def setCountry(self, country):
+        self.country = country
+
+    # Postal Area setter
+    def setPostalArea(self, postalArea):
+        self.postalArea = postalArea
+
+    # Organisation setter
+    def setOrg(self, org):
+        self.org = org
+
+    # Timezone setter
+    def setTimezone(self, timezone):
+        self.timezone = timezone
+
+    # Latitude setter
+    def setLatitude(self, latitude):
+        self.latitude = latitude
+
+    # Longitude setter
+    def setLongitude(self, longitude):
+        self.longitude = longitude
 
 
 # Shodan Class ###########################################################################################################
@@ -96,10 +204,53 @@ class Shodan:
         self.ports = ports
         self.reportLink = reportLink
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # IP Address setter
+    def setIP(self, ipAddress):
+        self.ipAddress = ipAddress
+
+    # Country setter
+    def setCountry(self, country):
+        self.country = country
+
+    # City setter
+    def setCity(self, city):
+        self.city = city
+
+    # Latitude setter
+    def setLatitude(self, latitude):
+        self.latitude = latitude
+
+    # Longitude setter
+    def setLongitude(self, longitude):
+        self.longitude = longitude
+
+    # Last Updated setter
+    def setLastUpdated(self, lastUpdated):
+        self.lastUpdated = lastUpdated
+
+    # Organisation setter
+    def setOrg(self, org):
+        self.org = org
+
+    # ISP setter
+    def setISP(self, isp):
+        self.isp = isp
+
+    # ASN setter
+    def setASN(self, asn):
+        self.asn = asn
+
+    # Vulnerabilities setter
+    def setVulnerabilities(self, vulnerabilities):
+        self.vulnerabilities = vulnerabilities
+
+    # Ports setter
+    def setPorts(self, ports):
+        self.ports = ports
+
+    # Report Link setter
+    def setReportLink(self, reportLink):
+        self.reportLink = reportLink
 
 
 # Urlscan Class ##########################################################################################################
@@ -122,10 +273,61 @@ class Urlscan:
         self.response = response
         self.reportLink = reportLink
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Last Analysed setter
+    def setLastAnalysed(self, lastAnalysed):
+        self.lastAnalysed = lastAnalysed
+
+    # Content Type setter
+    def setContentType(self, contentType):
+        self.contentType = contentType
+
+    # Document Type setter
+    def setDocumentType(self, documentType):
+        self.documentType = documentType
+
+    # Final URL setter
+    def setFinalUrl(self, finalURL):
+        self.finalUrl = finalURL
+
+    # IP Address setter
+    def setIP(self, ipAddress):
+        self.ipAddress = ipAddress
+
+    # Security Status setter
+    def setSecurityStatus(self, securityStatus):
+        self.securityStatus = securityStatus
+
+    # Server setter
+    def setServer(self, server):
+        self.server = server
+
+    # Country setter
+    def setCountry(self, country):
+        self.country = country
+
+    # City setter
+    def setCity(self, city):
+        self.city = city
+
+    # Registrar setter
+    def setRegistrar(self, registrar):
+        self.registrar - registrar
+
+    # Register Date setter
+    def setRegisterDate(self, registerDate):
+        self.registerDate = registerDate
+
+    # Verdicts setter
+    def setVerdicts(self, verdicts):
+        self.verdicts = verdicts
+
+    # Response setter
+    def setResponse(self, response):
+        self.response = response
+
+    # Report Link setter
+    def setReportLink(self, reportLink):
+        self.reportLink = reportLink
 
 
 # Virustotal Class #######################################################################################################
@@ -144,10 +346,45 @@ class Virustotal:
         self.vtGraph = vtGraph
         self.reportLink = reportLink
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Clean Detection setter
+    def setCleanDetection(self, cleanDetection):
+        self.cleanDetection = cleanDetection
+
+    # Malicious Detection setter
+    def setMalDetection(self, malDetection):
+        self.malDetection = malDetection
+
+    # Undetected setter
+    def setUndetected(self, undetected):
+        self.undetected = undetected
+
+    # Suspicious Detection setter
+    def setSusDetection(self, susDetection):
+        self.susDetection = susDetection
+
+    # Detections setter
+    def setDetections(self, detections):
+        self.detections = detections
+
+    # First Submitted setter
+    def setFirstSubmitted(self, firstSubmitted):
+        self.firstSubmitted = firstSubmitted
+
+    # Last Submitted setter
+    def setLastSubmitted(self, lastSubmitted):
+        self.lastSubmitted = lastSubmitted
+
+    # Total Submitted setter
+    def setTotalSubmissions(self, totalSubmissions):
+        self.totalSubmissions = totalSubmissions
+
+    # Virustotal Graph setter
+    def setVirustotalGraph(self, virustotalGraph):
+        self.vtGraph = virustotalGraph
+
+    # Report Link setter
+    def setReportLink(self, reportLink):
+        self.reportLink = reportLink
 
 # Virustotal Domain Sub-Class ############################################################################################
 class VtDomain(Virustotal):
@@ -162,14 +399,40 @@ class VtDomain(Virustotal):
         self.certStarted = certStarted
         self.certExpires = certExpires
         self.certIssuer = certIssuer
-
-        # invoking the __init__ of the Virustotal class 
+        # Invoking the __init__ of the Virustotal class
         Virustotal.__init__(self, cleanDetection, malDetection, undetected, susDetection, detections, firstSubmitted, lastSubmitted, totalSubmissions, vtGraph, reportLink)
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Domain setter
+    def setDomain(self, domain):
+        self.domain = domain
+    
+    # Categories setter
+    def setCategories(self, categories):
+        self.categories = categories
+    
+    # Registrar setter
+    def setRegistrar(self, registrar):
+        self.registrar = registrar
+
+    # Date Created setter
+    def setDateCreated(self, dateCreated):
+        self.dateCreated = dateCreated
+
+    # Last Modified setter
+    def setLastModified(self, lastModified):
+        self.lastModified = lastModified
+
+    # Certificate Started setter
+    def setCertStarted(self, certStarted):
+        self.certStarted = certStarted
+
+    # Certificate Expires setter
+    def setCertExpires(self, certExpires):
+        self.certExpires = certExpires
+
+    # Certificate Issuer setter
+    def setCertIssuer(self, certIssuer):
+        self.certIssuer = certIssuer
 
 # Virustotal File Hash Sub-Class #########################################################################################
 class VtFileHash(Virustotal):
@@ -187,14 +450,52 @@ class VtFileHash(Virustotal):
         self.md5 = md5
         self.sha1 = sha1
         self.sha256 = sha256
-
-        # invoking the __init__ of the Virustotal class 
+        # Invoking the __init__ of the Virustotal class 
         Virustotal.__init__(self, cleanDetection, malDetection, undetected, susDetection, detections, firstSubmitted, lastSubmitted, totalSubmissions, vtGraph, reportLink)
- 
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+
+    # Description setter
+    def setDescription(self, description):
+        self.description = description
+
+    # Known Names setter
+    def setKnownNames(self, knownNames):
+        self.knownNames = knownNames
+
+    # File Size setter
+    def setFileSize(self, fileSize):
+        self.fileSize = fileSize
+
+    # Threat Label setter
+    def setThreatLabel(self, threatLabel):
+        self.threatLabel = threatLabel
+
+    # Magic setter
+    def setMagic(self, magic):
+        self.magic = magic
+
+    # Product setter
+    def setProduct(self, product):
+        self.product = product
+
+    # Product Description setter
+    def setProductDesc(self, productDesc):
+        self.productDesc = productDesc
+
+    # Product Version setter
+    def setProductVersion(self, productVersion):
+        self.productVersion = productVersion
+
+    # MD5 setter
+    def setMD5(self, md5):
+        self.md5 = md5
+
+    # SHA1 setter
+    def setSHA1(self, sha1):
+        self.sha1 = sha1
+
+    # SHA256 setter
+    def setSHA256(self, sha256):
+        self.sha256 = sha256
 
 # Virustotal IP Address Sub-Class ########################################################################################
 class VtIP(Virustotal):
@@ -207,14 +508,32 @@ class VtIP(Virustotal):
         self.aso = aso
         self.asn = asn
         self.registrar = registrar
-
-        # invoking the __init__ of the Virustotal class 
+        # Invoking the __init__ of the Virustotal class 
         Virustotal.__init__(self, cleanDetection, malDetection, undetected, susDetection, detections, firstSubmitted, lastSubmitted, totalSubmissions, vtGraph, reportLink)
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Network setter
+    def setNetwork(self, network):
+        self.network = network
+
+    # Country setter
+    def setCountry(self, country):
+        self.country = country
+    
+    # Continent setter
+    def setContinent(self, continent):
+        self.continent = continent
+
+    # ASO setter
+    def setASO(self, aso):
+        self.aso = aso
+
+    # ASN setter
+    def setASN(self, asn):
+        self.asn = asn
+
+    # Registrar setter
+    def setRegistrar(self, registrar):
+        self.registrar = registrar
 
 # Virustotal Url Sub-Class ###############################################################################################
 class VtUrl(Virustotal):
@@ -227,11 +546,29 @@ class VtUrl(Virustotal):
         self.contentType = contentType
         self.server = server
         self.response = response
-
-        # invoking the __init__ of the Virustotal class 
+        # Invoking the __init__ of the Virustotal class 
         Virustotal.__init__(self, cleanDetection, malDetection, undetected, susDetection, detections, firstSubmitted, lastSubmitted, totalSubmissions, vtGraph, reportLink)
  
-    # A sample method 
-    def fun(self):
-        print("I'm a", self.attr1)
-        print("I'm a", self.attr2)
+    # Categories setter
+    def setCategories(self, categories):
+        self.categories = categories
+
+    # Final URL setter
+    def setFinalURL(self, finalURL):
+        self.finalUrl = finalURL
+
+    # Site Title setter
+    def setSiteTitle(self, siteTitle):
+        self.siteTitle = siteTitle
+
+    # Content Type setter
+    def setContentType(self, contentType):
+        self.contentType = contentType
+
+    # Server setter
+    def setServer(self, server):
+        self.server = server
+
+    # Response setter
+    def setResponse(self, response):
+        self.response = response
