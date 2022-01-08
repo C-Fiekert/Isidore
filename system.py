@@ -1,4 +1,19 @@
-import re
+import re, os
+
+def initialise(userSettings):
+    # Read in API keys from text file
+    cwd = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(cwd)
+    f = open("keys.txt", "r")
+
+    userSettings.setVirustotalKey(f.readline()[3:-1])
+    userSettings.setURLScanKey(f.readline()[3:-1])
+    userSettings.setHybridAnalysisKey(f.readline()[3:-1])
+    userSettings.setAbuseIPKey(f.readline()[4:-1])
+    userSettings.setShodanKey(f.readline()[3:-1])
+    userSettings.setIPInfoKey(f.readline()[3:-1])
+    f.close()
+
 
 # Query Class #######################################################################################################
 class Query:
@@ -206,15 +221,15 @@ class Settings:
 
     # Update API key in Settings
     def updateApiKey(self, service, key):
-        if service == "Virustotal":
+        if service == "1":
             self.setVirustotalKey(key)
-        elif service == "URLScan":
+        elif service == "2":
             self.setURLScanKey(key)
-        elif service == "Hybrid Analysis":
+        elif service == "3":
             self.setHybridAnalysisKey(key)
-        elif service == "AbuseIPDB":
+        elif service == "4":
             self.setAbuseIPKey(key)
-        elif service == "Shodan":
+        elif service == "5":
             self.setShodanKey(key)
-        elif service == "IPInfo":
+        elif service == "6":
             self.setIPInfoKey(key)

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Isidore ~ Home</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link href='https://fonts.googleapis.com/css?family=Alata' rel='stylesheet'>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+  <link rel="stylesheet" href="../static/dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__shake" src="../static/logo.png" alt="Isidore" height="60" width="60">
+  </div>
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/home" class="nav-link">Home</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/url" class="nav-link">URL</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/ip" class="nav-link">IP Address</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/domain" class="nav-link">Domain</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/filehash" class="nav-link">File Hash</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/settings" class="nav-link">Settings</a>
+      </li>
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+      <!-- Navbar Search -->
+      <li class="nav-item">
+        <a class="nav-link"href="/history" role="button">
+          <i class="fas fa-history"></i>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+          <i class="fas fa-expand-arrows-alt"></i>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside style="background-color: #0E4F61;" class="main-sidebar elevation-4">
+    <!-- Brand Logo -->
+    <a href="/home" class="brand-link">
+      <img src="../static/logo.png" alt="Isidore" class="brand-image elevation-0" style="opacity: .8">
+      <span class="brand-text font-weight-light" style="color: white; margin-left: 15px; font-family: 'Alata';">ISIDORE</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <br>
+          <li class="nav-item">
+            <a href="/home" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-home"></i><p>Home</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/url" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-paperclip"></i><p style="color: white;">URL</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/ip" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-ethernet"></i><p style="color: white;">IP Address</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/domain" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-globe"></i><p style="color: white;">Domain</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/filehash" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-file-alt"></i><p style="color: white;"> File Hash</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/history" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-history"></i><p style="color: white;">Search History</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/settings" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-cogs"></i><p style="color: white;">Settings</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">Welcome to Isidore!</h1>
+          </div>
+        </div><!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <!-- Left col -->
+          <section class="col-lg-6 connectedSortable">
+            <div class="card shadow-lg">
+              <!-- Widget: user widget style 2 -->
+              <div class="card card-widget widget-user-2 shadow-sm">
+                <!-- Add the bg color to the header using any of the bg-* classes -->
+                <div style="background-color: #0E4F61;" class="widget-user-header">
+                  <div class="widget-user-image">
+                    <img src="../static/logo.png">
+                  </div>
+                  <h3 class="widget-user-username" style="color: white;">About the Project</h3>
+                </div>
+                <div class="card-footer p-0">
+                  <p style="margin-left: 1em;">I first started working on this tool in September of 2021 for my Final Year Project in college. My idea for the tool came from my experience within a SOC 
+                  environment during my internship. The purpose of the tool is to be able to query multiple services at once about potentially malicious URLs, IP addresses, 
+                  domains, and file hashes. The tool makes the information easy to digest and also saves time for SOC members allowing them to handle investigations quicker and more 
+                  efficiently. </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="card shadow-lg">
+              <div style="background-color: #0E4F61;" class="card-header">
+                <h3 class="card-title" style="color: white;">Search History</h3>
+              </div>
+              <div class="card-body">
+                <table id="example1" class="table table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="example1_info">
+                  <thead>
+                    <tr role="row">
+                      <th class="sorting sorting_asc" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending" style="">Date</th>
+                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Query</th>
+                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending">Malicious VirusTotal Detections</th>
+                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending">Query Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{ info | safe }}
+                  </tbody>
+                </table>
+                <br>
+                <a href="/history"><button style="background-color: #0E4F61; color: white;" type="button"class="btn btn-block">View all history</button></a>
+              </div>
+            </div>
+          </section>
+          <!-- /.Left col -->
+          <!-- right col (We are only adding the ID to make the widgets sortable)-->
+          <section class="col-lg-6 connectedSortable">
+            <div class="card shadow-lg">
+              <div style="background-color: #0E4F61;" class="card-header">
+                <h3 class="card-title" style="color: white;">Add API Key</h3>
+              </div>
+              <div class="card-body">
+                <form action="/home" method="POST">
+                  <div class="input-group mb-3">
+                    <span class="input-group-text" id="basic-addon1">
+                      <select name="service" class="form-select" aria-label="Default select example">
+                        <option selected value="1">Virustotal</option>
+                        <option value="2">URLScan</option>
+                        <option value="3">Hybrid Analysis</option>
+                        <option value="4">AbuseIPDB</option>
+                        <option value="5">Shodan</option>
+                        <option value="6">IPinfo</option>
+                      </select>
+                    </span>
+                    <input type="text" class="form-control" placeholder="Enter your API key here" name="key" aria-label="Search" aria-describedby="basic-addon1"></input>
+                  </div>
+                  <br>
+                  <button style="background-color: #0E4F61; color: white;" class="btn btn-block" type="submit" id="keySubmitted">Add Key</button>
+                </form>
+              </div>
+            </div>
+
+            <div class="card card-widget widget-user shadow-lg">
+              <!-- Add the bg color to the header using any of the bg-* classes -->
+              <div class="widget-user-header text-white" style="background: url('../static/waterford.jpg') center center;">
+                <h3 class="widget-user-username text-right">About Me</h3>
+                <h5 class="widget-user-desc text-right">Callum Fiekert</h5>
+              </div>
+              <div class="widget-user-image">
+                <img class="img-circle" src="../static/me.jpg" alt="User Avatar">
+              </div>
+              <div class="card-footer">
+                <div class="row">
+                  <div class="col-sm-4 border-right">
+                    <div class="description-block">
+                      <h5 class="description-header">Waterford, Ireland</h5>
+                      <span class="description-text">FROM</span>
+                    </div>
+                  </div>
+                  <div class="col-sm-4 border-right">
+                    <div class="description-block">
+                      <h5 class="description-header"><a href="https://callum-fiekert.com" target="_blank">callum-fiekert.com</a></h5>
+                      <span class="description-text">MY WEBSITE</span>
+                    </div>
+                  </div>
+                  <div class="col-sm-4">
+                    <div class="description-block">
+                      <h5 class="description-header">22</h5>
+                      <span class="description-text">AGE</span>
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-left: 1em;"class="row">
+                  <p>I am a student studying Applied Computing in Waterford Institute of Technology where I am specializing in Computer Forensics & Security. 
+                  In my past time, I enjoy furthering my computer skills where I have recently been learning scripting with Python. I have also been learning different 
+                  libraries which come with Python and applying my knowledge to this tool. I also enjoy volunteering and giving back when I can. I help mentor 
+                  first year computing students in college to help them find their feet. I have recently completed an internship with Trend Micro where I learned invaluable 
+                  skills within a SOC team and also helped educate parents, kids, and families about how to be safe online.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <!-- right col -->
+        </div>
+        <!-- /.row (main row) -->
+      </div><!-- /.container-fluid -->
+    </section>
+  </div>
+  <!-- /.content-wrapper -->
+  <footer class="main-footer">
+    This App was created by <strong><a href="https://callum-fiekert.com" target="_blank">Callum Fiekert</a></strong>
+  </footer>
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery -->
+<script src="../static/plugins/jquery/jquery.min.js"></script>
+<script src="../static/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script>
+  $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script src="../static/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../static/dist/js/adminlte.js"></script>
+<script src="../static/dist/js/demo.js"></script>
+<script src="../static/dist/js/pages/dashboard.js"></script>
+
+<script type="text/javascript">
+  if ({{ keyAdded | safe}} == 1) {
+    toastr.success('API Key successfully added!')
+  } else if ({{ keyAdded | safe}} == 2) {
+    toastr.error('Unable to add API key')
+  } else if ({{ keyAdded | safe}} == 3) {
+    toastr.warning('Please enter an API key!')
+  }
+</script>
+
+<div id="toastsContainerTopRight" class="toasts-top-right fixed"></div>
+</body>
+</html>
