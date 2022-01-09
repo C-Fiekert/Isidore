@@ -15,15 +15,17 @@ initialise(userSettings)
 def home():
     global userSettings
     keyAdded = 0
-
+    # Runs if POST request received
     if request.method == "POST":
         try:
             # Grabs the submitted service and API key
             service = request.form.get("service")
             key = request.form["key"]
+            # If the key is empty, return a warning
             if key == "":
                 keyAdded = 3
             else:
+                # Update the user settings
                 userSettings.updateApiKey(service, key)
                 f = open("keys.txt", "w")
                 f.write("VT:" + userSettings.virustotalKey + "\n")
@@ -33,8 +35,10 @@ def home():
                 f.write("SH:" + userSettings.shodanKey + "\n")
                 f.write("IP:" + userSettings.ipInfoKey + "\n")
                 f.close()
+                # Return a success notification
                 keyAdded = 1
         except:
+            # Return an error notification
             keyAdded = 2
 
     # Returns the Home page
@@ -51,8 +55,36 @@ def history():
 # Settings page
 @app.route("/settings", methods=["POST", "GET"])
 def settings():
+    global userSettings
+    keyAdded = 0
+    # Runs if POST request received
+    if request.method == "POST":
+        try:
+            # Grabs the submitted service and API key
+            service = request.form.get("service")
+            key = request.form["key"]
+            # If the key is empty, return a warning
+            if key == "":
+                keyAdded = 3
+            else:
+                # Update the user settings
+                userSettings.updateApiKey(service, key)
+                f = open("keys.txt", "w")
+                f.write("VT:" + userSettings.virustotalKey + "\n")
+                f.write("US:" + userSettings.urlscanKey + "\n")
+                f.write("HA:" + userSettings.hybridAnalysisKey + "\n")
+                f.write("AIP:" + userSettings.abuseIPKey + "\n")
+                f.write("SH:" + userSettings.shodanKey + "\n")
+                f.write("IP:" + userSettings.ipInfoKey + "\n")
+                f.close()
+                # Return a success notification
+                keyAdded = 1
+        except:
+            # Return an error notification
+            keyAdded = 2
+
     # Returns the Settings page
-    return render_template("settings.html")
+    return render_template("settings.html", keyAdded=keyAdded)
 
 # URL page
 @app.route("/url", methods=["POST", "GET"])
