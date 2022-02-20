@@ -1,7 +1,9 @@
 # Project Imports
+from cgitb import html
 from flask import Flask, request, render_template
-from system import Settings, initialise
-import os, webbrowser, hashlib
+from api import HybridAnalysis, Urlscan, VtUrl
+from system import Settings, UrlQuery, initialise
+import os, webbrowser, hashlib, datetime
 
 # Defining Flask App
 app = Flask(__name__)
@@ -36,6 +38,7 @@ def home():
                 f.write("IP:" + userSettings.ipInfoKey + "\n")
                 f.close()
                 # Return a success notification
+                
                 keyAdded = 1
         except:
             # Return an error notification
@@ -43,8 +46,6 @@ def home():
 
     # Returns the Home page
     return render_template("home.html", keyAdded=keyAdded)
-
-    
 
 # Search History page
 @app.route("/history", methods=["POST", "GET"])
@@ -89,8 +90,52 @@ def settings():
 # URL page
 @app.route("/url", methods=["POST", "GET"])
 def url():
+    global userSettings
+    disabled = "disabled"
+
+    # Runs if POST request received
+    if request.method == "POST":
+        # try:
+        userQueries = request.form["query"]
+        userQueries = userQueries.split(' ')
+        html, chart, style = "", "", ""
+        count = 0
+        disabled = ""
+        for input in userQueries:
+        
+            query = UrlQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "URL", "", "", "")
+            query.defang()
+            qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
+            query.setQID(qId)
+
+            if query.validate():
+                virustotal = VtUrl("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                virustotal.retrieve(query.query, userSettings.virustotalKey)
+                virustotalCard = virustotal.generate(count)
+
+                urlscan = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                urlscan.retrieve(query.query, userSettings.urlscanKey)
+                urlscanCard = urlscan.generate(count)
+
+                hybridAnalysis = HybridAnalysis("", "", "")
+                hybridAnalysis.retrieve(query.query, userSettings.hybridAnalysisKey)
+                hybridAnalysisCard = hybridAnalysis.generate()
+
+                query.setVirustotal(virustotal)
+                query.setUrlscan(urlscan)
+                query.setHybridAnalysis(hybridAnalysis)
+
+                html += query.generateHTML(virustotalCard, urlscanCard, hybridAnalysisCard, count)
+                chart += query.generateChart(virustotal, count)
+                style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+                count += 1
+        
+        return render_template("url.html", html=html, chart=chart, style=style, disabled=disabled)
+
+        # except:
+        #     return render_template("url.html")
     # Returns the URL Query page
-    return render_template("url.html")
+    return render_template("url.html", )
 
 # IP Address page
 @app.route("/ip", methods=["POST", "GET"])
