@@ -40,7 +40,7 @@ class Query:
 class DomainQuery(Query):
     
     # Class Initialiser
-    def __init__(self, id, query, submissionTime, queryType, virustotal, urlscan):
+    def __init__(self, qId, query, submissionTime, queryType, virustotal, urlscan):
         self.queryType = queryType
         self.virustotal = virustotal
         self.urlscan = urlscan
@@ -68,7 +68,7 @@ class DomainQuery(Query):
 class FileHashQuery(Query):
     
     # Class Initialiser
-    def __init__(self, id, query, submissionTime, queryType, virustotal, hybridAnalysis):
+    def __init__(self, qId, query, submissionTime, queryType, virustotal, hybridAnalysis):
         self.queryType = queryType
         self.virustotal = virustotal
         self.hybridAnalysis = hybridAnalysis
@@ -91,7 +91,7 @@ class FileHashQuery(Query):
 class IPQuery(Query):
     
     # Class Initialiser
-    def __init__(self, id, query, submissionTime, queryType, virustotal, abuseIP, greynoise, shodan, ipInfo):
+    def __init__(self, qId, query, submissionTime, queryType, virustotal, abuseIP, greynoise, shodan, ipInfo):
         self.queryType = queryType
         self.virustotal = virustotal
         self.abuseIP = abuseIP
@@ -115,7 +115,7 @@ class IPQuery(Query):
 
     # Greynoise object setter
     def setGreynoise(self, greynoise):
-        self,greynoise = greynoise
+        self.greynoise = greynoise
 
     # Shodan object setter
     def setShodan(self, shodan):
@@ -138,6 +138,19 @@ class IPQuery(Query):
             return False
         else:
             return True
+
+    def generateHTML(self, virustotal, abuseIP, greynoise, shodan, ipInfo, count):
+        if count == 0:
+            status = " active"
+        else:
+            status = ""
+        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span>            </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + greynoise + ipInfo + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + abuseIP + shodan + '</section> </div> </div>'
+        
+        return html
+
+    def generateChart(self, virustotal, count):
+        chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script>'
+        return chart
 
 # Url Query Sub-Class ###############################################################################################
 class UrlQuery(Query):

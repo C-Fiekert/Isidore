@@ -1,8 +1,8 @@
 # Project Imports
 from cgitb import html
 from flask import Flask, request, render_template
-from api import HybridAnalysis, Urlscan, VtUrl
-from system import Settings, UrlQuery, initialise
+from api import HybridAnalysis, Urlscan, VtUrl, VtIP, AbuseIP, Greynoise, Shodan, IPinfo
+from system import Settings, UrlQuery, IPQuery, initialise
 import os, webbrowser, hashlib, datetime
 
 # Defining Flask App
@@ -135,12 +135,64 @@ def url():
         # except:
         #     return render_template("url.html")
     # Returns the URL Query page
-    return render_template("url.html", )
+    return render_template("url.html", disabled=disabled)
 
 # IP Address page
 @app.route("/ip", methods=["POST", "GET"])
 def ip():
-    # Returns the IP Address Query page
+    global userSettings
+    
+    # Runs if POST request received
+    if request.method == "POST":
+        # try:
+        userQueries = request.form["query"]
+        userQueries = userQueries.split(' ')
+        html, chart, style = "", "", ""
+        count = 0
+        for input in userQueries:
+        
+            query = IPQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "IP Address", "", "", "", "", "")
+            query.defang()
+            qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
+            query.setQID(qId)
+
+            if query.validate():
+                virustotal = VtIP("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                virustotal.retrieve(query.query, userSettings.virustotalKey)
+                virustotalCard = virustotal.generate(count)
+
+                abuseIp = AbuseIP("", "", "", "", "", "", "", "", "", "", "", "")
+                abuseIp.retrieve(query.query, userSettings.abuseIPKey)
+                abuseIpCard = abuseIp.generate(count)
+
+                greynoise = Greynoise("", "", "", "", "", "", "")
+                greynoise.retrieve(query.query)
+                greynoiseCard = greynoise.generate()
+
+                shodan = Shodan("", "", "", "", "", "", "", "", "", "", "", "")
+                shodan.retrieve(query.query, userSettings.shodanKey)
+                shodanCard = shodan.generate(count)
+
+                ipInfo = IPinfo("", "", "", "", "", "", "", "", "", "")
+                ipInfo.retrieve(query.query, userSettings.ipInfoKey)
+                ipInfoCard = ipInfo.generate()
+
+                query.setVirustotal(virustotal)
+                query.setAbuseIP(abuseIp)
+                query.setGreynoise(greynoise)
+                query.setShodan(shodan)
+                query.setIPInfo(ipInfo)
+
+                html += query.generateHTML(virustotalCard, abuseIpCard, greynoiseCard, shodanCard, ipInfoCard, count)
+                chart += query.generateChart(virustotal, count)
+                style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+                count += 1
+        
+        return render_template("ip.html", html=html, chart=chart, style=style)
+
+        # except:
+        #     return render_template("url.html")
+    # Returns the URL Query page
     return render_template("ip.html")
 
 # Domain page
