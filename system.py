@@ -64,6 +64,27 @@ class DomainQuery(Query):
         # Takes the user query input and validates the Domain format
         self.query = self.query.replace("[.]", ".")
 
+    # Validates Domains
+    def validate(self):
+        # Checks for Domain formatting
+        match = re.search("^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$", self.query)
+        if match == None:
+            return False
+        else:
+            return True
+
+    def generateHTML(self, virustotal, urlscan, count):
+        if count == 0:
+            status = " active"
+        else:
+            status = ""
+        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span> </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + urlscan + '</section> </div> </div>'
+        return html
+
+    def generateChart(self, virustotal, count):
+        chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script>'
+        return chart
+
 # File Hash Query Sub-Class #########################################################################################
 class FileHashQuery(Query):
     
@@ -86,6 +107,27 @@ class FileHashQuery(Query):
     # Hybrid Analysis object setter
     def setHybridAnalysis(self, hybridAnalysis):
         self.hybridAnalysis = hybridAnalysis
+
+    # Validates Domains
+    def validate(self):
+        # Checks for Domain formatting
+        match = re.search("^[a-fA-F0-9]{32}$|^[a-fA-F0-9]{40}$|^[a-fA-F0-9]{64}$", self.query)
+        if match == None:
+            return False
+        else:
+            return True
+
+    def generateHTML(self, virustotal, hybridanalysis, count):
+        if count == 0:
+            status = " active"
+        else:
+            status = ""
+        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span> </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + hybridanalysis + '</section> </div> </div>'
+        return html
+
+    def generateChart(self, virustotal, count):
+        chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script>'
+        return chart
 
 # IP Address Query Sub-Class ########################################################################################
 class IPQuery(Query):
@@ -148,8 +190,9 @@ class IPQuery(Query):
         
         return html
 
-    def generateChart(self, virustotal, count):
-        chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script>'
+    def generateChart(self, virustotal, abuseIp, count):
+        chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script><script> am4core.useTheme(am4themes_animated); var chart2 = am4core.create("chart2div' + str(count) + '", am4charts.XYChart3D); chart2.data = [{"confidence": "Confidence", "percent":' + str(abuseIp.abuseConfidence[:-1]) + '}]; var categoryAxis = chart2.yAxes.push(new am4charts.CategoryAxis()); categoryAxis.dataFields.category = "confidence"; var  valueAxis = chart2.xAxes.push(new am4charts.ValueAxis()); valueAxis.title.text = "Confidence of Abuse (%)"; valueAxis.max = 100; valueAxis.min = 0; var series = chart2.series.push(new am4charts.ColumnSeries3D()); series.dataFields.valueX = "percent"; series.dataFields.categoryY = "confidence"; series.name = "Confidence"; series.columns.template.tooltipText = "Confidence: {percent}%"; </script>'
+        
         return chart
 
 # Url Query Sub-Class ###############################################################################################

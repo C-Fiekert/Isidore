@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Isidore ~ Settings</title>
+  <title>Isidore ~ Search History</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -11,7 +11,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
   <link rel="stylesheet" href="../static/dist/css/adminlte.min.css">
 </head>
@@ -46,7 +45,13 @@
         <a href="/filehash" class="nav-link">File Hash</a>
       </li>
       <li class="nav-item d-none d-sm-inline-block">
-        <a href="/settings" class="nav-link" style="color: #BA8A49">Settings</a>
+        <a href="/search" class="nav-link">Search Engine</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/b64encode" class="nav-link">Base64</a>
+      </li>
+      <li class="nav-item d-none d-sm-inline-block">
+        <a href="/settings" class="nav-link">Settings</a>
       </li>
     </ul>
 
@@ -55,7 +60,7 @@
       <!-- Navbar Search -->
       <li class="nav-item">
         <a class="nav-link" href="/history" role="button">
-          <i class="fas fa-history"></i>
+          <i class="fas fa-history" style="color: #BA8A49"></i>
         </a>
       </li>
       <li class="nav-item">
@@ -106,12 +111,22 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="/history" class="nav-link" style="color: white;">
+            <a href="/search" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-search"></i><p>Search Engine</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/b64encode" class="nav-link" style="color: white;">
+              <i class="nav-icon fas fa-code"></i><p>Base64</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="/history" class="nav-link" style="color: #BA8A49">
               <i class="nav-icon fas fa-history"></i><p>Search History</p>
             </a>
           </li>
           <li class="nav-item">
-            <a href="/settings" class="nav-link" style="color: #BA8A49;">
+            <a href="/settings" class="nav-link" style="color: white;">
               <i class="nav-icon fas fa-cogs"></i><p>Settings</p>
             </a>
           </li>
@@ -126,61 +141,41 @@
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
-        <div class="row">
-          <div class="col">
-            <h1 class="m-0">Customise your Settings!</h1>
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">Here is your Search History!</h1>
+            <a href="/clear"><button style="background-color: #0E4F61; color: white; float: right;" type="button"class="btn">Clear history</button></a>
           </div>
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
     </div>
     <!-- /.content-header -->
 
+    <!-- Main content -->
     <section class="content">
       <div class="container-fluid">
         <div class="row">
-          <section class="col-lg-6 connectedSortable">
+          <!-- Left col -->
+          <section class="col-lg-12 connectedSortable">
             <div class="card shadow-lg">
-              <div style="background-color: #0E4F61;" class="card-header">
-                <h3 class="card-title" style="color: white;">Add API Key</h3>
+              <div  style="background-color: #0E4F61; color: white;" class="card-header">
+                <h3 class="card-title">Search History</h3>
               </div>
               <div class="card-body">
-                <form action="/settings" method="POST">
-                  <div class="input-group">
-                    <span class="input-group-text" style="width: 100%;">
-                      <select name="service" class="form-select" style="width: 30%">
-                        <option selected value="1">VirusTotal</option>
-                        <option value="2">URLScan</option>
-                        <option value="3">Hybrid Analysis</option>
-                        <option value="4">AbuseIPDB</option>
-                        <option value="5">Shodan</option>
-                        <option value="6">IPinfo</option>
-                      </select>
-                      <input type="text" class="form-control" placeholder="Enter your API key here" name="key" aria-label="Search"></input>
-                    </span>
-                  </div>
-                  <br>
-                  <button style="background-color: #0E4F61; color: white;" class="btn btn-block" type="submit" id="keyAdded">Add Key</button>
-                </form>
+                <table id="example1" class="table table-bordered table-striped dataTable dtr-inline" role="grid" aria-describedby="example1_info">
+                  <thead>
+                    <tr role="row">
+                      <th class="sorting sorting_asc" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Rendering engine: activate to sort column descending" style="">Date</th>
+                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending">Query</th>
+                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending">Malicious VirusTotal Detections</th>
+                      <th class="sorting" tabindex="0" aria-controls="example1" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending">Query Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{ info | safe }}
+                  </tbody>
+                </table>
               </div>
-            </div>
-          </section>
-          <section class="col-lg-6 connectedSortable">
-            <div class="card shadow-lg">
-              <form action="/colour" method="POST">
-                <div style="background-color: #0E4F61;" class="card-header">
-                  <h3 class="card-title" style="color: white;">Dark Mode</h3>
-                </div>
-                <div class="card-body">
-                  <center>
-                    <div class="form-check form-switch">
-                      <label class="form-check-label" for="flexSwitchCheckDefault" style="margin-right: 3em;"><b><u>Toggle Dark Mode:</u></b></label>
-                      <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" disabled>
-                    </div>
-                  </center>
-                  <br>
-                  <button style="background-color: #0E4F61; color: white;" class="btn btn-block" type="submit" id="button-addon3" disabled>Change</button>
-                </div>
-              </form>
             </div>
           </section>
         </div>
@@ -196,7 +191,6 @@
 </div>
 <!-- ./wrapper -->
 
-<!-- jQuery -->
 <script src="../static/plugins/jquery/jquery.min.js"></script>
 <script src="../static/plugins/jquery-ui/jquery-ui.min.js"></script>
 <script>
@@ -208,13 +202,8 @@
 <script src="../static/dist/js/pages/dashboard.js"></script>
 
 <script type="text/javascript">
-  if ({{ keyAdded | safe}} == 1) {
-    toastr.success('API Key successfully added!')
-  } else if ({{ keyAdded | safe}} == 2) {
-    toastr.error('Unable to add API key')
-  } else if ({{ keyAdded | safe}} == 3) {
-    toastr.warning('Please enter an API key!')
-  }
+  toastr.success('{{ message }}')
 </script>
+<div id="toastsContainerTopRight" class="toasts-top-right fixed"></div>
 </body>
 </html>

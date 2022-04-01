@@ -1,4 +1,5 @@
 import base64, requests, datetime, pycountry, time, re, json
+from unicodedata import name
 
 # AbuseIPDB Class ########################################################################################################
 class AbuseIP:
@@ -89,7 +90,7 @@ class AbuseIP:
 
         
     def generate(self, count):
-        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61;" class="card-header ui-sortable-handle"><h3 class="card-title">AbuseIPDB Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><br><br><br><img src="/static/abuseip.png" class="rounded mx-auto d-block" id="aiplogo" style="width: 80%; height: 13%;"><br><div id="chart2div' + str(count) + '"></div><br><ul class="list-group"><li class="list-group-item" style="padding-left: 4em;"><b>IP Address: </b>' + self.ipAddress + '</li><li class="list-group-item" style="padding-left: 4.8em;"><b>Public IP: </b>' + str(self.publicIP) + '</li><li class="list-group-item" style="padding-left: 4.3em;"><b>IP Version: </b>' + str(self.ipVersion) + '</li><li class="list-group-item" style="padding-left: 3.6em;"><div data-bs-toggle="tooltip" title="Shows if this IP is on AbuseIPDBs Whitelist"><b>Whitelisted: </b>' + str(self.whitelisted) + '</div></li><li class="list-group-item" style="padding-left: 0.5em;"><div data-bs-toggle="tooltip" title="AbuseIPDBs confidence that this is malicious"><b>Abuse Confidence: </b>' + self.abuseConfidence + '</div></li><li class="list-group-item" style="padding-left: 5.2em;"><b>Country: </b>' + self.country + '</li><li class="list-group-item" style="padding-left: 3.8em;"><b>Usage Type: </b>' + self.usageType + '</li><li class="list-group-item" style="padding-left: 7.7em;"><b>ISP: </b>' + self.isp + '</li><li class="list-group-item" style="padding-left: 5.5em;"><b>Domain: </b>' + self.domain + '</li><li class="accordion-item"><h2 class="accordion-header" id="headingTwo"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(2 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(2 + 6*(count - 1)) + '"  style="padding-left: 1.2em;"><b>View Report Info: </b></button></h2><div id="collapse' + str(2 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample"><div class="accordion-body"><ul class="list-group"><li class="list-group-item" style="padding-left: 3em;"><b>Total Reports: </b>' + str(self.totalReports) + '</li><li class="list-group-item" style="padding-left: 2.9em;"><b>Last Reported: </b>' + self.lastReported + '</li><li class="list-group-item" style="padding-left: 2em;"><b>AbuseIP Link:</b><a href=' + self.reportLink + ' target="_blank"> View the UrlScan Report</a></li></ul></ul> </div></div>'
+        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"><h3 class="card-title">AbuseIPDB Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><br><br><br><img src="/static/abuseip.png" class="rounded mx-auto d-block" id="aiplogo" style="width: 80%; height: 13%;"><br><div id="chart2div' + str(count) + '"></div><br><ul class="list-group"><li class="list-group-item" style="padding-left: 4em;"><b>IP Address: </b>' + str(self.ipAddress) + '</li><li class="list-group-item" style="padding-left: 4.8em;"><b>Public IP: </b>' + str(self.publicIP) + '</li><li class="list-group-item" style="padding-left: 4.3em;"><b>IP Version: </b>' + str(self.ipVersion) + '</li><li class="list-group-item" style="padding-left: 3.6em;"><div data-bs-toggle="tooltip" title="Shows if this IP is on AbuseIPDBs Whitelist"><b>Whitelisted: </b>' + str(self.whitelisted) + '</div></li><li class="list-group-item" style="padding-left: 0.5em;"><div data-bs-toggle="tooltip" title="AbuseIPDBs confidence that this is malicious"><b>Abuse Confidence: </b>' + str(self.abuseConfidence) + '</div></li><li class="list-group-item" style="padding-left: 5.2em;"><b>Country: </b>' + str(self.country) + '</li><li class="list-group-item" style="padding-left: 3.8em;"><b>Usage Type: </b>' + str(self.usageType) + '</li><li class="list-group-item" style="padding-left: 7.7em;"><b>ISP: </b>' + str(self.isp) + '</li><li class="list-group-item" style="padding-left: 5.5em;"><b>Domain: </b>' + str(self.domain) + '</li><li class="accordion-item"><h2 class="accordion-header" id="headingTwo"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(2 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(2 + 6*(count - 1)) + '"  style="padding-left: 1.2em;"><b>View Report Info: </b></button></h2><div id="collapse' + str(2 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample"><div class="accordion-body"><ul class="list-group"><li class="list-group-item" style="padding-left: 3em;"><b>Total Reports: </b>' + str(self.totalReports) + '</li><li class="list-group-item" style="padding-left: 2.9em;"><b>Last Reported: </b>' + str(self.lastReported) + '</li><li class="list-group-item" style="padding-left: 3.3em;"><b>AbuseIP Link:</b><a href=' + str(self.reportLink) + ' target="_blank"> View the AbuseIP Report</a></li></ul></ul> </div></div>'
         return html
 
     # Parse Virustotal query response
@@ -188,7 +189,7 @@ class Greynoise:
 
         
     def generate(self):
-        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61;" class="card-header ui-sortable-handle"><h3 class="card-title">Greynoise Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><img src="/static/greynoise.png" class="rounded mx-auto d-block" id="gnlogo" style="width: 85%; height: 25%;"><br><ul class="list-group"><li class="list-group-item" style="padding-left: 5em;"><b>IP Address: </b>' + self.ipAddress + '</li><li class="list-group-item" style="padding-left: 7.3em;"><div data-bs-toggle="tooltip" title="Has been observed scanning the internet"><b>Noise: </b>' + str(self.noise) + '</div></li><li class="list-group-item" style="padding-left: 7.7em;"><div data-bs-toggle="tooltip" title="Rule It OuT: Declared safe by Greynoise"><b>RIOT: </b>' + str(self.riot) + '</div></li><li class="list-group-item" style="padding-left: 6.6em;"><b>Verdict: </b>' + self.verdict + '</li><li class="list-group-item" style="padding-left: 7.1em;"><b>Name: </b>' + self.name + '</li><li class="list-group-item" style="padding-left: 5.4em;"><b>Last Seen: </b>' + self.lastSeen + '</li><li class="list-group-item" style="padding-left: 2.9em;"><b>Greynoise Link: </b><a href=' + self.reportLink + ' target="_blank">View the Greynoise Report</a></li></ul></div></div>'
+        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"><h3 class="card-title">Greynoise Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><img src="/static/greynoise.png" class="rounded mx-auto d-block" id="gnlogo" style="width: 85%; height: 25%;"><br><ul class="list-group"><li class="list-group-item" style="padding-left: 5em;"><b>IP Address: </b>' + self.ipAddress + '</li><li class="list-group-item" style="padding-left: 7.3em;"><div data-bs-toggle="tooltip" title="Has been observed scanning the internet"><b>Noise: </b>' + str(self.noise) + '</div></li><li class="list-group-item" style="padding-left: 7.7em;"><div data-bs-toggle="tooltip" title="Rule It OuT: Declared safe by Greynoise"><b>RIOT: </b>' + str(self.riot) + '</div></li><li class="list-group-item" style="padding-left: 6.6em;"><b>Verdict: </b>' + self.verdict + '</li><li class="list-group-item" style="padding-left: 7.1em;"><b>Name: </b>' + self.name + '</li><li class="list-group-item" style="padding-left: 5.4em;"><b>Last Seen: </b>' + self.lastSeen + '</li><li class="list-group-item" style="padding-left: 2.9em;"><b>Greynoise Link: </b><a href=' + self.reportLink + ' target="_blank">View the Greynoise Report</a></li></ul></div></div>'
         return html
 
     
@@ -207,10 +208,15 @@ class Greynoise:
 class HybridAnalysis:
     
     # Class Initialiser
-    def __init__(self, submissionName, verdict, analysisTime):
+    def __init__(self, submissionName, verdict, analysisTime, filetype="", filesize="", md5="", sha1="", sha256=""):
         self.submissionName = submissionName
         self.verdict = verdict
         self.analysisTime = analysisTime
+        self.filetype = filetype
+        self.filesize = filesize
+        self.md5 = md5
+        self.sha1 = sha1
+        self.sha256 = sha256
  
     # Submission Name setter
     def setSubmissionName(self, submissionName):
@@ -224,18 +230,35 @@ class HybridAnalysis:
     def setAnalysisTime(self, analysisTime):
         self.analysisTime = analysisTime
 
-
-    def retrieve(self, query, key):
+    def retrieve(self, query, type, key):
         if key == "":
             return
 
-        extension = re.findall("jpg$|png$|aif$|cda$|mid$|midi$|mp3$|mpa$|ogg$|wav$|wma$|wpl$|7z$|arj$|deb$|pkg$|rar$|rpm$|tar.gz$|z$|zip$|bin$|dmg$|iso$|toast$|vcd$|csv$|dat$|db$|dbf$|log$|mdb$|sav$|sql$|tar$|xml$|email$|eml$|emlx$|msg$|oft$|ost$|pst$|vcf$|apk$|bat$|cgi$|pl$|exe$|gadget$|jar$|msi$|py$|wsf$|ai$|bmp$|gif$|ico$|jpeg$|ps$|psd$|svg$|tif$|tiff$|js$|key$|odp$|pps$|ppt$|pptx$|c$|class$|cpp$|cs$|java$|php$|sh$|swift$|vb$|ods$|xls$|xlsm$|xlsx$|cfg$|dll$|dmp$|ini$|lnk$|sys$|tmp$|mov$|mp4$|wmv$|doc$|docx$|pdf$|txt$", query)
-        # Runs if the URL has one of the listed extensions
-        if len(extension) == 0:
+        if type == "url":
+            extension = re.findall("jpg$|png$|aif$|cda$|mid$|midi$|mp3$|mpa$|ogg$|wav$|wma$|wpl$|7z$|arj$|deb$|pkg$|rar$|rpm$|tar.gz$|z$|zip$|bin$|dmg$|iso$|toast$|vcd$|csv$|dat$|db$|dbf$|log$|mdb$|sav$|sql$|tar$|xml$|email$|eml$|emlx$|msg$|oft$|ost$|pst$|vcf$|apk$|bat$|cgi$|pl$|exe$|gadget$|jar$|msi$|py$|wsf$|ai$|bmp$|gif$|ico$|jpeg$|ps$|psd$|svg$|tif$|tiff$|js$|key$|odp$|pps$|ppt$|pptx$|c$|class$|cpp$|cs$|java$|php$|sh$|swift$|vb$|ods$|xls$|xlsm$|xlsx$|cfg$|dll$|dmp$|ini$|lnk$|sys$|tmp$|mov$|mp4$|wmv$|doc$|docx$|pdf$|txt$", query)
+            # Runs if the URL has one of the listed extensions
+            if len(extension) == 0:
+                headers = {'api-key': key, "accept": "application/json", "user-agent": "Falcon Sandbox", "Content-Type": "application/x-www-form-urlencoded"}
+                # API request for Hybrid Analsyis information on the provided URL
+                response = requests.post("https://www.hybrid-analysis.com/api/v2/search/terms", headers=headers , data = "url=" + query)
+                response_json = response.json()
+
+                # Checks for valid API key
+                if "message" in response_json:
+                    if "The provided API key is incompatible" in response_json["message"]:
+                        return
+
+                # Queries and returns information
+                if response_json["count"] == 0:
+                    self.quickScan(query, headers, response_json)
+                else:
+                    self.sort(response_json, "url")
+        else:
             headers = {'api-key': key, "accept": "application/json", "user-agent": "Falcon Sandbox", "Content-Type": "application/x-www-form-urlencoded"}
             # API request for Hybrid Analsyis information on the provided URL
-            response = requests.post("https://www.hybrid-analysis.com/api/v2/search/terms", headers=headers , data = "url=" + query)
+            response = requests.post("https://www.hybrid-analysis.com/api/v2/search/hash", headers=headers , data = 'hash=' + query)
             response_json = response.json()
+            print(response_json)
 
             # Checks for valid API key
             if "message" in response_json:
@@ -243,11 +266,8 @@ class HybridAnalysis:
                     return
 
             # Queries and returns information
-            if response_json["count"] == 0:
-                self.quickScan(query, headers, response_json)
-            else:
-                self.sort(response_json)
-
+            if len(response_json) > 0:
+                self.sort(response_json, "filehash")
 
     # Scans Url for new results and parses information
     def quickScan(self, query, headers, response_json):
@@ -270,27 +290,47 @@ class HybridAnalysis:
             self.parse(retrieved)
 
     # Sorts retrieved results by most relevant
-    def sort(self, response_json):
-        datelist = []
-        for info in response_json["result"]:
-            temp = info["analysis_start_time"]
-            if temp != None:
-                if temp[10] == "T":
-                    temp = temp[0:10] + " " + temp[11:19]
-                datelist.append(temp)
-        datelist.sort(key=lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
-        selection = response_json["result"][0]
-        for info in response_json["result"]:
-            if info["analysis_start_time"] != None:
-                check = info["analysis_start_time"][0:10] + " " + info["analysis_start_time"][11:19]
-                if check == datelist[len(datelist)-1]:
-                    selection = info
-        if response_json["search_terms"][0]["value"] != None:
-            self.setSubmissionName(response_json["search_terms"][0]["value"])
-        if selection["verdict"] != None:
-            self.setVerdict(selection["verdict"])
-        if selection["analysis_start_time"] != None:
-            self.setAnalysisTime(selection["analysis_start_time"])
+    def sort(self, json, type):
+        if type == "url":
+            datelist = []
+            for info in json["result"]:
+                temp = info["analysis_start_time"]
+                if temp != None:
+                    if temp[10] == "T":
+                        temp = temp[0:10] + " " + temp[11:19]
+                    datelist.append(temp)
+            datelist.sort(key=lambda date: datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
+            selection = json["result"][0]
+            for info in json["result"]:
+                if info["analysis_start_time"] != None:
+                    check = info["analysis_start_time"][0:10] + " " + info["analysis_start_time"][11:19]
+                    if check == datelist[len(datelist)-1]:
+                        selection = info
+
+            if json["search_terms"][0]["value"] != None:
+                self.setSubmissionName(json["search_terms"][0]["value"])
+            if selection["verdict"] != None:
+                self.setVerdict(selection["verdict"])
+            if selection["analysis_start_time"] != None:
+                self.setAnalysisTime(selection["analysis_start_time"])
+        else:
+            if json[0]["state"] == "SUCCESS":
+                # Sorts through the Hybrid Analysis response for all relevant information and parses it correctly
+                if json[0]["verdict"] != None:
+                    self.setVerdict(json[0]["verdict"])
+                if json[0]["analysis_start_time"] != None:
+                    self.setAnalysisTime(json[0]["analysis_start_time"])
+                if json[0]["size"] != None:
+                    temp = json[0]["size"] / 1000
+                    self.filesize = str(temp) + " KB"
+                if json[0]["type"] != None:
+                    self.filetype = json[0]["type"]
+                if json[0]["md5"] != None:
+                    self.md5 = json[0]["md5"]
+                if json[0]["sha1"] != None:
+                    self.sha1 = json[0]["sha1"]
+                if json[0]["sha256"] != None:
+                    self.sha256 = json[0]["sha256"]
 
     # Parses newly retrieved information
     def parse(self, json):
@@ -301,8 +341,11 @@ class HybridAnalysis:
         if json[0]["analysis_start_time"] != None:
             self.setAnalysisTime(json[0]["analysis_start_time"])
 
-    def generate(self):
-        html = '<div class="card shadow-lg"> <div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"> <h3 class="card-title">Hybrid Analysis Results</h3> <div class="card-tools"> <button type="button" class="btn btn-tool" data-card-widget="collapse"> <i class="fas fa-minus"></i> </button> </div> </div> <div class="card-body"> <img src="/static/hybrid-analysis.png" class="rounded mx-auto d-block" id="halogo"> <ul class="list-group"> <li class="list-group-item" style="padding-left: 2.8em;"><b>Submission Name: </b>' + self.submissionName + '</li> <li class="list-group-item" style="padding-left: 7.8em;"><b>Verdict: </b>' + self.verdict + '</li> <li class="list-group-item" style="padding-left: 4.6em;"><b>Analysis Time: </b>' + self.analysisTime + '</li> </ul> <br><br><br> </div> </div>'
+    def generate(self, type):
+        if type == "url":
+            html = '<div class="card shadow-lg"> <div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"> <h3 class="card-title">Hybrid Analysis Results</h3> <div class="card-tools"> <button type="button" class="btn btn-tool" data-card-widget="collapse"> <i class="fas fa-minus"></i> </button> </div> </div> <div class="card-body"> <img src="/static/hybrid-analysis.png" class="rounded mx-auto d-block" id="halogo"> <ul class="list-group"> <li class="list-group-item" style="padding-left: 2.8em;"><b>Submission Name: </b>' + self.submissionName + '</li> <li class="list-group-item" style="padding-left: 7.8em;"><b>Verdict: </b>' + self.verdict + '</li> <li class="list-group-item" style="padding-left: 4.6em;"><b>Analysis Time: </b>' + self.analysisTime + '</li> </ul> <br><br><br> </div> </div>'
+        else:
+            html = '<div class="card shadow-lg"> <div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"> <h3 class="card-title">Hybrid Analysis Results</h3> <div class="card-tools"> <button type="button" class="btn btn-tool" data-card-widget="collapse"> <i class="fas fa-minus"></i> </button> </div> </div> <div class="card-body"> <img src="/static/hybrid-analysis.png" class="rounded mx-auto d-block" id="urllogo" style="width: 70%; height: 16%;"> <br> <center> <h4> Hybrid Analysis detected this as ' + self.verdict + '</h4> </center> <br> <ul class="list-group"> <li class="list-group-item" style="padding-left: 2.8em;"><b>Analysis Time: </b>' + self.analysisTime + '</li> <li class="list-group-item" style="padding-left: 5.9em;"><b>Verdict: </b>' + self.verdict + '</li> <li class="list-group-item" style="padding-left: 5em;"><b>File Type: </b>' + self.filetype + '</li> <li class="list-group-item" style="padding-left: 5.3em;"><b>File Size: </b>' + self.filesize + '</li> <li class="list-group-item" style="padding-left: 4.2em;"><b>MD5 Hash: </b>' + self.md5 + '</li> <li class="list-group-item" style="padding-left: 3.9em;"><b>SHA1 Hash: </b>' + self.sha1 + '</li> <li class="list-group-item" style="padding-left: 2.7em;"><b>SHA256 Hash: </b>' + self.sha256 + '</li> </ul> </div> </div>'
         return html
     
 
@@ -407,7 +450,7 @@ class IPinfo:
             self.setLongitude(json["loc"].split(',')[1])
 
     def generate(self):
-        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61;" class="card-header ui-sortable-handle"><h3 class="card-title">Shodan Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><img src="/static/ipinfo.png" class="rounded mx-auto d-block" id="ipilogo"><br><div style="width: 100%"><iframe scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=' + self.latitude + ',' + self.longitude + '&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed" width="100%" height="400" frameborder="0"></iframe></div> <br><ul class="list-group"><li class="list-group-item" style="padding-left: 2.8em;"><b>IP Address: </b>' + self.ipAddress + '</li><li class="list-group-item" style="padding-left: 3em;"><b>Hostname: </b>' + self.hostName + '</li><li class="list-group-item" style="padding-left: 6em;"><b>City: </b>' + self.city + '</li><li class="list-group-item" style="padding-left: 4.6em;"><b>Region: </b>' + self.region + '</li><li class="list-group-item" style="padding-left: 4.1em;"><b>Country: </b>' + self.country + '</li><li class="list-group-item" style="padding-left: 2.6em;"><b>Postal Area: </b>' + str(self.postalArea) + '</li><li class="list-group-item" style="padding-left: 6.1em;"><b>Org: </b>' + self.org + '</li><li class="list-group-item" style="padding-left: 3.3em;"><b>Timezone: </b>' + self.timezone + '</li></ul></div></div>'
+        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"><h3 class="card-title">Shodan Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><img src="/static/ipinfo.png" class="rounded mx-auto d-block" id="ipilogo"><br><div style="width: 100%"><iframe scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=' + self.latitude + ',' + self.longitude + '&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed" width="100%" height="400" frameborder="0"></iframe></div> <br><ul class="list-group"><li class="list-group-item" style="padding-left: 2.8em;"><b>IP Address: </b>' + self.ipAddress + '</li><li class="list-group-item" style="padding-left: 3em;"><b>Hostname: </b>' + self.hostName + '</li><li class="list-group-item" style="padding-left: 6em;"><b>City: </b>' + self.city + '</li><li class="list-group-item" style="padding-left: 4.6em;"><b>Region: </b>' + self.region + '</li><li class="list-group-item" style="padding-left: 4.1em;"><b>Country: </b>' + self.country + '</li><li class="list-group-item" style="padding-left: 2.6em;"><b>Postal Area: </b>' + str(self.postalArea) + '</li><li class="list-group-item" style="padding-left: 6.1em;"><b>Org: </b>' + self.org + '</li><li class="list-group-item" style="padding-left: 3.3em;"><b>Timezone: </b>' + self.timezone + '</li></ul></div></div>'
         return html
         
 
@@ -515,30 +558,8 @@ class Shodan:
             referenceHtml = '<li class="accordion-item"> <h2 class="accordion-header" id="heading' + str(5000 + temp + 10000*count) + '"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(5000 + temp + 10000*count) + '" aria-expanded="true" aria-controls="collapse' + str(5000 + temp + 10000*count) + '"  style="padding-left: 2.2em;"><b>References: </b></button> </h2> <div id="collapse' + str(5000 + temp + 10000*count) + '" class="accordion-collapse collapse" aria-labelledby="heading' + str(5000 + temp + 10000*count) + '" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group">' + referenceItems + '</ul></div> </div> </li>'
             vulnsHtml += '<li class="accordion-item"> <h2 class="accordion-header" id="heading' + str(temp + 10000*count) + '"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(temp + 10000*count) + '" aria-expanded="true" aria-controls="collapse' + str(temp + 10000*count) + '"  style="padding-left: 1.2em;"><b>' + str(vuln[0]) + ': </b></button> </h2> <div id="collapse' + str(temp + 10000*count) + '" class="accordion-collapse collapse" aria-labelledby="heading' + str(temp + 10000*count) + '" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group"><li class="list-group-item" style="padding-left: 4em;"><b>Verified: </b>' + str(vuln[1]) + '</li> <li class="list-group-item" style="padding-left: 5.5em;"><b>CVSS: </b>' + str(vuln[2]) + '</li> <li class="list-group-item" style="padding-left: 3em;"><b>Summary: </b>' + str(vuln[3]) + '</li>' + referenceHtml + '</ul> </div> </div> </li>'
             temp += 1
-        
-        # vulns = []
-        # if "data" in json:
-        #     for fields in json["data"]:
-        #         if "vulns" in fields:
-        #             id = 0
-        #             for vulnerability in fields["vulns"]:
-        #                 id+=1
-        #                 name = fields["vulns"][vulnerability]
-        #                 verified = fields["vulns"][vulnerability]["verified"]
-        #                 cvss = str(fields["vulns"][vulnerability]["cvss"])
-        #                 summary = fields["vulns"][vulnerability]["summary"]
-        #                 references = []
-        #                 if "references" in fields["vulns"][vulnerability]:
-        #                     for reference in fields["vulns"][vulnerability]["references"]:
-        #                         references.append(reference)
 
-        #                 info = [name, verified, cvss, summary, references]
-        #                 vulns.append(info)
-        # self.setVulnerabilities(vulns)
-
-
-
-        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61;" class="card-header ui-sortable-handle"><h3 class="card-title">Shodan Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><img src="/static/shodan.png" id="shlogo" class="rounded mx-auto d-block" style="width: 85%; height: 14%;"><br> <div style="width: 100%"><iframe scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=' + str(self.latitude) + ',%20' + str(self.longitude) + '+(My%20Business%20Name)&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed" width="100%" height="400" frameborder="0"></iframe></div> <br><ul class="list-group"><li class="list-group-item" style="padding-left: 5em;"><b>IP Address: </b>' + self.ipAddress + '</li><li class="list-group-item" style="padding-left: 6.1em;"><b>Country: </b>' + self.country + '</li><li class="list-group-item" style="padding-left: 8em;"><b>City: </b>' + self.city + '</li><li class="list-group-item" style="padding-left: 5.9em;"><b>Latitude: </b>' + str(self.latitude) + '</li><li class="list-group-item" style="padding-left: 5em;"><b>Longitude: </b>' + str(self.longitude) + '</li><li class="list-group-item" style="padding-left: 3.5em;"><b>Last Updated: </b>' + self.lastUpdated + '</li><li class="list-group-item" style="padding-left: 7.9em;"><b>Org: </b>' + self.org + '</li><li class="list-group-item" style="padding-left: 8.1em;"><b>ISP: </b>' + self.isp + '</li><li class="list-group-item" style="padding-left: 7.5em;"><b>ASN: </b>' + self.asn + '</li><li class="accordion-item"><h2 class="accordion-header" id="headingThree"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree"  style="padding-left: 2.7em;"><b>Vulnerabilities:</b></button></h2><div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample"><div class="accordion-body"><ul class="list-group">' + vulnsHtml + ' </ul></div></div></li><li class="accordion-item"><h2 class="accordion-header" id="headingFour"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour"  style="padding-left: 6.9em;"><b>Ports: </b></button></h2><div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample"><div class="accordion-body"><ul class="list-group">' + portsHtml + '</ul></div></div></li><li class="list-group-item" style="padding-left: 7.5em;"><b>Shodan Link:</b><a href=' + self.reportLink + ' target="_blank"> View the Shodan Report</a></li> </ul></div></div>'
+        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"><h3 class="card-title">Shodan Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><img src="/static/shodan.png" id="shlogo" class="rounded mx-auto d-block" style="width: 85%; height: 14%;"><br> <div style="width: 100%"><iframe scrolling="no" marginheight="0" marginwidth="0" src="https://maps.google.com/maps?width=100%25&amp;height=400&amp;hl=en&amp;q=' + str(self.latitude) + ',%20' + str(self.longitude) + '+(My%20Business%20Name)&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed" width="100%" height="400" frameborder="0"></iframe></div> <br><ul class="list-group"><li class="list-group-item" style="padding-left: 5em;"><b>IP Address: </b>' + self.ipAddress + '</li><li class="list-group-item" style="padding-left: 6.1em;"><b>Country: </b>' + self.country + '</li><li class="list-group-item" style="padding-left: 8em;"><b>City: </b>' + self.city + '</li><li class="list-group-item" style="padding-left: 5.9em;"><b>Latitude: </b>' + str(self.latitude) + '</li><li class="list-group-item" style="padding-left: 5em;"><b>Longitude: </b>' + str(self.longitude) + '</li><li class="list-group-item" style="padding-left: 3.5em;"><b>Last Updated: </b>' + self.lastUpdated + '</li><li class="list-group-item" style="padding-left: 7.9em;"><b>Org: </b>' + self.org + '</li><li class="list-group-item" style="padding-left: 8.1em;"><b>ISP: </b>' + self.isp + '</li><li class="list-group-item" style="padding-left: 7.5em;"><b>ASN: </b>' + self.asn + '</li><li class="accordion-item"><h2 class="accordion-header" id="headingThree"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree"  style="padding-left: 2.7em;"><b>Vulnerabilities:</b></button></h2><div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample"><div class="accordion-body"><ul class="list-group">' + vulnsHtml + ' </ul></div></div></li><li class="accordion-item"><h2 class="accordion-header" id="headingFour"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour"  style="padding-left: 6.9em;"><b>Ports: </b></button></h2><div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample"><div class="accordion-body"><ul class="list-group">' + portsHtml + '</ul></div></div></li><li class="list-group-item" style="padding-left: 3.8em;"><b>Shodan Link:</b><a href=' + self.reportLink + ' target="_blank"> View the Shodan Report</a></li> </ul></div></div>'
         return html
 
     
@@ -854,6 +875,76 @@ class VtDomain(Virustotal):
     def setCertIssuer(self, certIssuer):
         self.certIssuer = certIssuer
 
+    # Retrieve information
+    def retrieve(self, query, key):
+        if key == "":
+            return
+        
+        # API call headers
+        headers = {'x-apikey': key}
+        # API request to retrieve URL information from VirusTotal
+        result = "https://www.virustotal.com/api/v3/domains/" + query
+        response = requests.get(result, headers=headers)
+        response_json = response.json()
+        if "error" in response_json:
+            if "Wrong API key" in response_json["error"]["message"]:
+                print("Wrong API key")
+                return
+            else:
+                print("Big Problemo")
+
+        self.parse(query, response_json)
+
+
+    # Parse Virustotal query response
+    def parse(self, query, json):
+        if "data" in json:
+            if "creation_date" in json["data"]["attributes"]:
+                self.setDateCreated(str(datetime.datetime.utcfromtimestamp(json["data"]["attributes"]["creation_date"]).replace(tzinfo=datetime.timezone.utc)))
+            if "last_modification_date" in json["data"]["attributes"]:
+                self.setLastModified(str(datetime.datetime.utcfromtimestamp(json["data"]["attributes"]["last_modification_date"]).replace(tzinfo=datetime.timezone.utc)))
+            if "id" in json["data"]:
+                self.setDomain(json["data"]["id"])
+            
+            detections = []
+            categories = []
+            if "last_analysis_results" in json["data"]["attributes"]:
+                for engine in json["data"]["attributes"]["last_analysis_results"]:
+                    if json["data"]["attributes"]["last_analysis_results"][engine]["category"] == "malicious" or json["data"]["attributes"]["last_analysis_results"][engine]["category"] == "suspicious":
+                        detection = [json["data"]["attributes"]["last_analysis_results"][engine]["engine_name"], json["data"]["attributes"]["last_analysis_results"][engine]["category"]]
+                        detections.append(detection)
+            self.setDetections(detections)
+            if "categories" in json["data"]["attributes"]:
+                for comment in json["data"]["attributes"]["categories"]:
+                    category = [comment, json["data"]["attributes"]["categories"][comment]]
+                    categories.append(category)
+            self.setCategories(categories)
+            if "registrar" in json["data"]["attributes"]:
+                self.setRegistrar(json["data"]["attributes"]["registrar"])
+            if "last_https_certificate" in json["data"]["attributes"]:
+                self.setCertStarted(json["data"]["attributes"]["last_https_certificate"]["validity"]["not_before"])
+                self.setCertExpires(json["data"]["attributes"]["last_https_certificate"]["validity"]["not_after"])
+                self.setCertIssuer(json["data"]["attributes"]["last_https_certificate"]["issuer"]["O"])
+            self.setCleanDetection(json["data"]["attributes"]["last_analysis_stats"]["harmless"])
+            self.setMalDetection(json["data"]["attributes"]["last_analysis_stats"]["malicious"])
+            self.setSusDetection(json["data"]["attributes"]["last_analysis_stats"]["suspicious"])
+            self.setUndetected(json["data"]["attributes"]["last_analysis_stats"]["undetected"])
+            self.setReportLink("https://www.virustotal.com/gui/domain/" + query + "/detection")
+
+    def generate(self, count):
+        # Detections list
+        detectionsHtml = ""
+        for i in self.detections:
+            detectionsHtml += '<li class="list-group-item" style="padding-left: 3em;"><b>' + i[0] + ':</b> ' + i[1] + '</li>'
+        
+        # Category list
+        categoriesHtml = ""
+        for i in self.categories:
+            categoriesHtml += '<li class="list-group-item" style="padding-left: 3em;"><b>' + i[0] + ':</b> ' + i[1] + '</li>'
+        
+        html = '<div class="card shadow-lg"> <div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"> <h3 class="card-title">VirusTotal Results</h3> <div class="card-tools"> <button type="button" class="btn btn-tool" data-card-widget="collapse"> <i class="fas fa-minus"></i> </button> </div> </div> <div class="card-body"> <img src="/static/vt.png" class="rounded mx-auto d-block" id="vtlogo" style="width: 70%; height: 18%;"> <div id="chartdiv' + str(count) + '"></div> <br><br> <div id="detections"> <center> <button type="button" class="btn btn-success"> Clean Detections <span class="badge bg-dark">' + str(self.cleanDetection) + '</span> </button> <button type="button" class="btn btn-danger"> Malicious Detections <span class="badge bg-dark">' + str(self.malDetection) + '</span> </button> <button type="button" class="btn btn-secondary"> Undetected Detections <span class="badge bg-dark">' + str(self.undetected) + '</span> </button> </center> </div> <br> <ul class="list-group"> <li class="list-group-item" style="padding-left: 7.3em;"><b>Domain: </b>' + self.domain + '</li> <li class="accordion-item"> <h2 class="accordion-header" id="headingOne"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(1 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(1 + 6*(count - 1)) + '"  style="padding-left: 3.4em;"><b> View Detections: </b></button> </h2> <div id="collapse' + str(1 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group">' + detectionsHtml + '</ul> </div> </div> </li> <li class="accordion-item"> <h2 class="accordion-header" id="headingTwo"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(2 + 6*(count - 1)) + '" aria-expanded="false" aria-controls="collapse' + str(2 + 6*(count - 1)) + '"  style="padding-left: 3.4em;"><b> View Categories: </b></button> </h2> <div id="collapse' + str(2 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group">' + categoriesHtml + ' </ul> </div> </div> </li> <li class="list-group-item" style="padding-left: 6.7em;"><b>Registrar: </b>' + self.registrar + '</li> <li class="list-group-item" style="padding-left: 4.5em;"><b>Creation Date: </b>' + self.dateCreated + '</li> <li class="list-group-item" style="padding-left: 4.5em;"><b>Last Modified: </b>' + self.lastModified + '</li> <li class="accordion-item"> <h2 class="accordion-header" id="headingThree"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(5 + 6*(count - 1)) + '" aria-expanded="false" aria-controls="collapse' + str(5 + 6*(count - 1)) + '"  style="padding-left: 0.5em;"><b>Last HTTPS Certificate: </b></button> </h2> <div id="collapse' + str(5 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group"><li class="list-group-item" style="padding-left: 3em;"><b>Certificate Started:</b> ' + self.certStarted + '</li><li class="list-group-item" style="padding-left: 3em;"><b>Certificate Expires:</b> ' + self.certExpires + '</li><li class="list-group-item" style="padding-left: 7.1em;"><b>Issued By:</b> ' + self.certIssuer + '</li> </ul> </div> </div> </li> <li class="list-group-item" style="padding-left: 5.5em;"><b>VirusTotal Link: </b><a href=' + self.reportLink + ' target="_blank">View the VirusTotal Report</a></li> </ul> </div> </div>'
+        return html
+
 # Virustotal File Hash Sub-Class #########################################################################################
 class VtFileHash(Virustotal):
     
@@ -916,6 +1007,89 @@ class VtFileHash(Virustotal):
     # SHA256 setter
     def setSHA256(self, sha256):
         self.sha256 = sha256
+
+    # Retrieve information
+    def retrieve(self, query, key):
+        if key == "":
+            return
+        
+        # API call headers
+        headers = {'x-apikey': key}
+        # API request to retrieve URL information from VirusTotal
+        result = "https://www.virustotal.com/api/v3/files/" + query
+        response = requests.get(result, headers=headers)
+        response_json = response.json()
+        if "error" in response_json:
+            if "Wrong API key" in response_json["error"]["message"]:
+                print("Wrong API key")
+                return
+            else:
+                print("Big Problemo")
+
+        self.parse(response_json)
+
+
+    # Parse Virustotal query response
+    def parse(self, json):
+        if "data" in json:
+            if "type_description" in json["data"]["attributes"]:
+                self.setDescription(str(json["data"]["attributes"]["type_description"]))
+            names = []
+            if "names" in json["data"]["attributes"]:
+                vtNames = json["data"]["attributes"]["names"]
+                for i in vtNames:
+                    names.append(i)
+            self.setKnownNames(names)
+            if "size" in json["data"]["attributes"]:
+                temp1 = json["data"]["attributes"]["size"] / 1000
+                self.setFileSize(str(temp1) + " KB")
+            if "popular_threat_classification" in json["data"]["attributes"]:
+                self.setThreatLabel(json["data"]["attributes"]["popular_threat_classification"]["suggested_threat_label"])
+            if "signature_info" in json["data"]["attributes"]:
+                if "product" in json["data"]["attributes"]["signature_info"]:
+                    self.setProduct(json["data"]["attributes"]["signature_info"]["product"])
+                if "description" in json["data"]["attributes"]["signature_info"]:
+                    self.setProductDesc(json["data"]["attributes"]["signature_info"]["description"])
+                if "file version" in json["data"]["attributes"]["signature_info"]:
+                    self.setProductVersion(json["data"]["attributes"]["signature_info"]["file version"])
+            if "magic" in json["data"]["attributes"]:
+                self.setMagic(json["data"]["attributes"]["magic"])
+            if "md5" in json["data"]["attributes"]:
+                self.setMD5(json["data"]["attributes"]["md5"])
+            if "sha1" in json["data"]["attributes"]:
+                self.setSHA1(json["data"]["attributes"]["sha1"])
+            if "sha256" in json["data"]["attributes"]:
+                self.setSHA256(json["data"]["attributes"]["sha256"])
+            
+            detections = []
+            if "last_analysis_results" in json["data"]["attributes"]:
+                for engine in json["data"]["attributes"]["last_analysis_results"]:
+                    if json["data"]["attributes"]["last_analysis_results"][engine]["category"] == "malicious" or json["data"]["attributes"]["last_analysis_results"][engine]["category"] == "suspicious":
+                        detection = [json["data"]["attributes"]["last_analysis_results"][engine]["engine_name"], json["data"]["attributes"]["last_analysis_results"][engine]["category"]]
+                        detections.append(detection)
+            self.setDetections(detections)
+            self.setCleanDetection(json["data"]["attributes"]["last_analysis_stats"]["harmless"])
+            self.setMalDetection(json["data"]["attributes"]["last_analysis_stats"]["malicious"])
+            self.setSusDetection(json["data"]["attributes"]["last_analysis_stats"]["suspicious"])
+            self.setUndetected(json["data"]["attributes"]["last_analysis_stats"]["undetected"])
+            
+            self.setFirstSubmitted(str(datetime.datetime.utcfromtimestamp(json["data"]["attributes"]["first_submission_date"]).replace(tzinfo=datetime.timezone.utc)))
+            self.setLastSubmitted(str(datetime.datetime.utcfromtimestamp(json["data"]["attributes"]["last_analysis_date"]).replace(tzinfo=datetime.timezone.utc)))
+            self.setTotalSubmissions(str(json["data"]["attributes"]["times_submitted"]))
+            self.setReportLink("https://www.virustotal.com/gui/file/" + str(json["data"]["id"]) + "/detection")
+
+    def generate(self, count):
+        # Detections list
+        detectionsHtml = ""
+        for i in self.detections:
+            detectionsHtml += '<li class="list-group-item" style="padding-left: 3em;"><b>' + i[0] + ':</b> ' + i[1] + '</li>'
+
+        namesHtml = ""
+        for i in self.knownNames:
+            namesHtml += '<li class="list-group-item" style="padding-left: 3em;">' + i + '</li>'
+        
+        html = '<div class="card shadow-lg"> <div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"> <h3 class="card-title">VirusTotal Results</h3> <div class="card-tools"> <button type="button" class="btn btn-tool" data-card-widget="collapse"> <i class="fas fa-minus"></i> </button> </div> </div> <div class="card-body"> <img src="/static/vt.png" class="rounded mx-auto d-block" id="vtlogo" style="width: 70%; height: 22%;"> <div id="chartdiv' + str(count) + '"></div> <br><br> <div id="detections"> <center> <button type="button" class="btn btn-success"> Clean Detections <span class="badge bg-dark">' + str(self.cleanDetection) + '</span> </button> <button type="button" class="btn btn-danger"> Malicious Detections <span class="badge bg-dark">' + str(self.malDetection) + '</span> </button> <button type="button" class="btn btn-secondary"> Undetected Detections <span class="badge bg-dark">' + str(self.undetected) + '</span> </button> </center> </div> <br> <ul class="list-group"> <li class="accordion-item"> <h2 class="accordion-header" id="headingOne"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(1 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(1 + 6*(count - 1)) + '"  style="padding-left: 3.4em;"><b> View Detections: </b></button> </h2> <div id="collapse' + str(1 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group">' + detectionsHtml + '</ul> </div> </div> </li> <li class="accordion-item"> <h2 class="accordion-header" id="headingTwo"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(2 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(2 + 6*(count - 1)) + '"  style="padding-left: 3.4em;"><b> Submission Details: </b></button> </h2> <div id="collapse' + str(2 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group"> <li class="list-group-item" style="padding-left: 2.8em;"><b>First Submitted: </b>' + self.firstSubmitted + '</li> <li class="list-group-item" style="padding-left: 2.8em;"><b>Last Analysed: </b>' + self.lastSubmitted + '</li> <li class="list-group-item" style="padding-left: 2.8em;"><b>Total Submissions: </b>' + str(self.totalSubmissions) + '</li> </ul> </div> </div> </li> <li class="list-group-item" style="padding-left: 3em;"><b>Description: </b>' + self.description + '</li> <li class="accordion-item"> <h2 class="accordion-header" id="headingThree"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(3 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(3 + 6*(count - 1)) + '"  style="padding-left: 3.4em;"><b> Known Names: </b></button> </h2> <div id="collapse' + str(3 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group">' + namesHtml + '</ul> </div> </div> </li> <li class="list-group-item" style="padding-left: 3.7em;"><b>File Size: </b>' + self.fileSize + '</li> <li class="list-group-item" style="padding-left: 4em;"><b>Threat label: </b>' + self.threatLabel + '</li> <li class="accordion-item"> <h2 class="accordion-header" id="headingFour"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(4 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(4 + 6*(count - 1)) + '"  style="padding-left: 3.4em;"><b> Signature Info: </b></button> </h2> <div id="collapse' + str(4 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group"><li class="list-group-item" style="padding-left: 3em;"><b> Product: </b>' + self.product + '</li><li class="list-group-item" style="padding-left: 3em;"><b> Description: </b>' + self.productDesc + '</li><li class="list-group-item" style="padding-left: 3em;"><b> Version: </b>' + self.productVersion + '</li> </ul> </div> </div> </li> <li class="list-group-item" style="padding-left: 3.7em;"><b>Magic: </b>' + self.magic + '</li> <li class="accordion-item"> <h2 class="accordion-header" id="headingFive"> <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(5 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(5 + 6*(count - 1)) + '"  style="padding-left: 3.4em;"><b> Hashes: </b></button> </h2> <div id="collapse' + str(5 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingFive" data-bs-parent="#accordionExample"> <div class="accordion-body"> <ul class="list-group"><li class="list-group-item" style="padding-left: 3em;"><b> MD5: </b>' + self.md5 + '</li><li class="list-group-item" style="padding-left: 3em;"><b> SHA1: </b>' + self.sha1 + '</li><li class="list-group-item" style="padding-left: 3em;"><b> SHA256: </b>' + self.sha256 + '</li> </ul> </div> </div> </li> <li class="list-group-item" style="padding-left: 5.5em;"><b>VirusTotal Link: </b><a href=' + self.reportLink + ' target="_blank">View the VirusTotal Report</a></li> </ul> </div> </div>'
+        return html
 
 # Virustotal IP Address Sub-Class ########################################################################################
 class VtIP(Virustotal):
@@ -1016,6 +1190,7 @@ class VtIP(Virustotal):
             self.setMalDetection(json["data"]["attributes"]["last_analysis_stats"]["malicious"])
             self.setSusDetection(json["data"]["attributes"]["last_analysis_stats"]["suspicious"])
             self.setUndetected(json["data"]["attributes"]["last_analysis_stats"]["undetected"])
+
             self.setRegistrar(str(json["data"]["attributes"]["regional_internet_registry"]))
             self.setReportLink("https://www.virustotal.com/gui/ip-address/" + query + "/detection")
 
@@ -1026,7 +1201,7 @@ class VtIP(Virustotal):
         for i in self.detections:
             detectionsHtml += '<li class="list-group-item" style="padding-left: 3em;"><b>' + i[0] + ':</b> ' + i[1] + '</li>'
         
-        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61;" class="card-header ui-sortable-handle"><h3 class="card-title">VirusTotal Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><img src="/static/vt.png" class="rounded mx-auto d-block" id="vtlogo" style="width: 70%;   height: 22%;"><div id="chartdiv' + str(count) + '"></div><br><br><div id="detections"><center><button type="button" class="btn btn-success"> Clean Detections <span class="badge bg-dark">' + str(self.cleanDetection) + '</span></button><button type="button" class="btn btn-danger"> Malicious Detections <span class="badge bg-dark">' + str(self.malDetection) + '</span></button><button type="button" class="btn btn-secondary"> Undetected Detections <span class="badge bg-dark">' + str(self.undetected) + '</span></button></center></div><br><ul class="list-group"><li class="accordion-item"><h2 class="accordion-header" id="headingOne"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(1 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(1 + 6*(count - 1)) + '"  style="padding-left: 6.5em;"><b> View Detections: </b></button></h2><div id="collapse' + str(1 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample"><div class="accordion-body"><ul class="list-group">' + detectionsHtml + '</ul></div></div></li><li class="list-group-item" style="padding-left: 10em;"><b>Network: </b>' + self.network + '</li><li class="list-group-item" style="padding-left: 10.2em;"><b>Country: </b>' + self.country + '</li><li class="list-group-item" style="padding-left: 9.5em;"><b>Continent: </b>' + self.continent + '</li><li class="list-group-item" style="padding-left: 1em;"><b>Autonomous System Owner: </b>' + self.aso + '</li><li class="list-group-item" style="padding-left: 0.2em;"><b>Autonomous System Number: </b>' + self.asn + '</li><li class="list-group-item" style="padding-left: 9.9em;"><b>Registrar: </b>' + self.registrar + '</li><li class="list-group-item" style="padding-left: 7.3em;"><b>VirusTotal Link: </b><a href=' + self.reportLink + ' target="_blank">View the VirusTotal Report</a></li> </ul></div></div>'
+        html = '<div class="card shadow-lg"><div style="background-color: #0E4F61; color: white;" class="card-header ui-sortable-handle"><h3 class="card-title">VirusTotal Results</h3><div class="card-tools"><button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button></div></div><div class="card-body"><img src="/static/vt.png" class="rounded mx-auto d-block" id="vtlogo" style="width: 70%;   height: 22%;"><div id="chartdiv' + str(count) + '"></div><br><br><div id="detections"><center><button type="button" class="btn btn-success"> Clean Detections <span class="badge bg-dark">' + str(self.cleanDetection) + '</span></button><button type="button" class="btn btn-danger"> Malicious Detections <span class="badge bg-dark">' + str(self.malDetection) + '</span></button><button type="button" class="btn btn-secondary"> Undetected Detections <span class="badge bg-dark">' + str(self.undetected) + '</span></button></center></div><br><ul class="list-group"><li class="accordion-item"><h2 class="accordion-header" id="headingOne"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse' + str(1 + 6*(count - 1)) + '" aria-expanded="true" aria-controls="collapse' + str(1 + 6*(count - 1)) + '"  style="padding-left: 6.5em;"><b> View Detections: </b></button></h2><div id="collapse' + str(1 + 6*(count - 1)) + '" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample"><div class="accordion-body"><ul class="list-group">' + detectionsHtml + '</ul></div></div></li><li class="list-group-item" style="padding-left: 10em;"><b>Network: </b>' + self.network + '</li><li class="list-group-item" style="padding-left: 10.2em;"><b>Country: </b>' + self.country + '</li><li class="list-group-item" style="padding-left: 9.5em;"><b>Continent: </b>' + self.continent + '</li><li class="list-group-item" style="padding-left: 1em;"><b>Autonomous System Owner: </b>' + self.aso + '</li><li class="list-group-item" style="padding-left: 0.2em;"><b>Autonomous System Number: </b>' + self.asn + '</li><li class="list-group-item" style="padding-left: 9.9em;"><b>Registrar: </b>' + self.registrar + '</li><li class="list-group-item" style="padding-left: 7.3em;"><b>VirusTotal Link: </b><a href=' + self.reportLink + ' target="_blank">View the VirusTotal Report</a></li> </ul></div></div>'
         return html
 
 
