@@ -1,7 +1,9 @@
-import base64, requests, datetime, pycountry, time, re, json
+import base64, requests, datetime, pycountry, time, re, json, dataclasses
 from unicodedata import name
+from hashlib import sha1, sha256
 
 # AbuseIPDB Class ########################################################################################################
+@dataclasses.dataclass
 class AbuseIP:
     
     # Class Initialiser
@@ -67,6 +69,10 @@ class AbuseIP:
     def setReportLink(self, reportLink):
         self.reportLink = reportLink
 
+    def todict(self):
+        return {"IP Address": self.ipAddress, "Public IP": self.publicIP, "IP Version": self.ipVersion, "Whitelisted": self.whitelisted, 
+                "Abuse Confidence": self.abuseConfidence, "Country": self.country, "Usage Type": self.usageType, "ISP": self.isp, 
+                "Domain": self.domain, "Total Reports": self.totalReports, "Last Reported": self.lastReported, "Report Link": self.reportLink}
     
     # Retrieve information
     def retrieve(self, query, key):
@@ -130,6 +136,7 @@ class AbuseIP:
 
 
 # Greynoise Class ########################################################################################################
+@dataclasses.dataclass
 class Greynoise:
     
     # Class Initialiser
@@ -170,6 +177,9 @@ class Greynoise:
     def setReportLink(self, reportLink):
         self.reportLink = reportLink
 
+    def todict(self):
+        return {"IP Address": self.ipAddress, "Noise": self.noise, "RIOT": self.riot, "Verdict": self.verdict, 
+                "Name": self.name, "Last Seen": self.lastSeen, "Report Link": self.reportLink}
     
     # Retrieve information
     def retrieve(self, query):
@@ -205,6 +215,7 @@ class Greynoise:
 
 
 # Hybrid Analysis Class ##################################################################################################
+@dataclasses.dataclass
 class HybridAnalysis:
     
     # Class Initialiser
@@ -229,6 +240,10 @@ class HybridAnalysis:
     # Analysis Time setter
     def setAnalysisTime(self, analysisTime):
         self.analysisTime = analysisTime
+
+    def todict(self):
+        return {"Submission Name": self.submissionName, "Verdict": self.verdict, "Analysis Time": self.analysisTime, "File Type": self.filetype, 
+                "File Size": self.filesize, "MD5": self.md5, "SHA1": self.sha1, "SHA256": self.sha256}
 
     def retrieve(self, query, type, key):
         if key == "":
@@ -258,7 +273,6 @@ class HybridAnalysis:
             # API request for Hybrid Analsyis information on the provided URL
             response = requests.post("https://www.hybrid-analysis.com/api/v2/search/hash", headers=headers , data = 'hash=' + query)
             response_json = response.json()
-            print(response_json)
 
             # Checks for valid API key
             if "message" in response_json:
@@ -350,6 +364,7 @@ class HybridAnalysis:
     
 
 # IPinfo Class ###########################################################################################################
+@dataclasses.dataclass
 class IPinfo:
     
     # Class Initialiser
@@ -405,6 +420,11 @@ class IPinfo:
     def setLongitude(self, longitude):
         self.longitude = longitude
 
+    def todict(self):
+        return {"IP Address": self.ipAddress, "Hostname": self.hostName, "City": self.city, "Region": self.region, 
+                "Country": self.country, "Postal Area": self.postalArea, "Org": self.org, "Timezone": self.timezone, 
+                "Latitude": self.latitude, "Longitude": self.longitude}
+
     # Retrieve information
     def retrieve(self, query, key):
         if key == "":
@@ -456,6 +476,7 @@ class IPinfo:
 
 
 # Shodan Class ###########################################################################################################
+@dataclasses.dataclass
 class Shodan:
     
     # Class Initialiser
@@ -521,6 +542,10 @@ class Shodan:
     def setReportLink(self, reportLink):
         self.reportLink = reportLink
 
+    def todict(self):
+        return {"IP Address": self.ipAddress, "Country": self.country, "City": self.city, "Latitude": self.latitude, 
+                "Longitude": self.longitude, "Last Updated": self.lastUpdated, "Org": self.org, "ISP": self.isp, 
+                "ASN": self.asn, "Vulnerabilities": "N/A", "Ports": self.ports, "Report Link": self.reportLink}
 
     # Retrieve information
     def retrieve(self, query, key):
@@ -602,6 +627,7 @@ class Shodan:
 
 
 # Urlscan Class ##########################################################################################################
+@dataclasses.dataclass
 class Urlscan:
     
     # Class Initialiser
@@ -677,6 +703,12 @@ class Urlscan:
     def setReportLink(self, reportLink):
         self.reportLink = reportLink
 
+    def todict(self):
+        return {"Screenshot": self.screenshot, "Last Analysed": self.lastAnalysed, "Content Type": self.contentType, "Document Type": self.documentType, 
+                "Final URL": self.finalUrl, "IP Address": self.ipAddress, "Security Status": self.securityStatus, "Server": self.server, 
+                "Country": self.country, "City": self.city, "Registrar": self.registrar, "Registrar Date": self.registerDate, "Response": self.response, 
+                "Report Link": self.reportLink}
+
     # Retrieve information
     def retrieve(self, query, key):
         if key == "":
@@ -699,7 +731,8 @@ class Urlscan:
         if "message" in response_json:
             if response_json["message"] == "API key supplied but not found in database!":
                 return
-
+            elif response_json["message"] == 'Expected "/", "\\\\", or any character but end of input found.':
+                return
         # If there are no existing results, run code
         if len(response_json['results']) == 0:
             print("Submitted")
@@ -707,7 +740,6 @@ class Urlscan:
             data = {"url": query, "visibility": "unlisted"}
             urlScan = requests.post('https://urlscan.io/api/v1/scan/',headers=headers, data=json.dumps(data))
             usResult = urlScan.json()
-            print(usResult)
             usID = usResult["uuid"]
             tries = 20
             # Requests for the result until it is received or the max number of attempts is hit
@@ -772,6 +804,7 @@ class Urlscan:
 
 
 # Virustotal Class #######################################################################################################
+@dataclasses.dataclass
 class Virustotal:
     
     # Class Initialiser
@@ -828,6 +861,7 @@ class Virustotal:
         self.reportLink = reportLink
 
 # Virustotal Domain Sub-Class ############################################################################################
+@dataclasses.dataclass
 class VtDomain(Virustotal):
     
     # Class Initialiser
@@ -874,6 +908,18 @@ class VtDomain(Virustotal):
     # Certificate Issuer setter
     def setCertIssuer(self, certIssuer):
         self.certIssuer = certIssuer
+
+    def todict(self):
+        detect = {}
+        category = {}
+        for item in self.detections:
+            detect[item[0].replace('.', '')] = item[1]
+        for item in self.categories:
+            category[item[0].replace('.', '')] = item[1]
+        return {"Clean Detection": self.cleanDetection, "Malicious Detection": self.malDetection, "Undetected": self.undetected, "Suspicious Detection": self.susDetection, 
+                "Detections": detect, "First Submitted": self.firstSubmitted, "Last Submitted": self.lastSubmitted, "Total Submissions": self.totalSubmissions, 
+                "Report Link": self.reportLink, "Domain": self.domain, "registrar": self.registrar, "Categories": category, "Date Created": self.dateCreated, 
+                "Last Modified": self.lastModified, "Cert Started": self.certStarted, "Cert Expires": self.certExpires, "Cert Issuer": self.certIssuer}
 
     # Retrieve information
     def retrieve(self, query, key):
@@ -946,6 +992,7 @@ class VtDomain(Virustotal):
         return html
 
 # Virustotal File Hash Sub-Class #########################################################################################
+@dataclasses.dataclass
 class VtFileHash(Virustotal):
     
     # Class Initialiser
@@ -1007,6 +1054,16 @@ class VtFileHash(Virustotal):
     # SHA256 setter
     def setSHA256(self, sha256):
         self.sha256 = sha256
+
+    def todict(self):
+        detect = {}
+        for item in self.detections:
+            detect[item[0].replace('.', '')] = item[1]
+        return {"Clean Detection": self.cleanDetection, "Malicious Detection": self.malDetection, "Undetected": self.undetected, "Suspicious Detection": self.susDetection, 
+                "Detections": detect, "First Submitted": self.firstSubmitted, "Last Submitted": self.lastSubmitted, "Total Submissions": self.totalSubmissions, 
+                "Report Link": self.reportLink, "Description": self.description, "Known Names": self.knownNames, "File Size": self.fileSize, "Threat Label": self.threatLabel, 
+                "Magic": self.magic, "Product": self.product, "Product Description": self.productDesc, "Product Version": self.productVersion, "MD5": self.md5, 
+                "SHA1": self.sha1, "SHA256": self.sha256}
 
     # Retrieve information
     def retrieve(self, query, key):
@@ -1092,6 +1149,7 @@ class VtFileHash(Virustotal):
         return html
 
 # Virustotal IP Address Sub-Class ########################################################################################
+@dataclasses.dataclass
 class VtIP(Virustotal):
     
     # Class Initialiser
@@ -1128,6 +1186,15 @@ class VtIP(Virustotal):
     # Registrar setter
     def setRegistrar(self, registrar):
         self.registrar = registrar
+
+    def todict(self):
+        detect = {}
+        for item in self.detections:
+            detect[item[0].replace('.', '')] = item[1]
+        return {"Clean Detection": self.cleanDetection, "Malicious Detection": self.malDetection, "Undetected": self.undetected, "Suspicious Detection": self.susDetection, 
+                "Detections": detect, "First Submitted": self.firstSubmitted, "Last Submitted": self.lastSubmitted, "Total Submissions": self.totalSubmissions, 
+                "Report Link": self.reportLink, "Network": self.network, "Country": self.country, "Continent": self.continent, "ASO": self.aso, "ASN": self.asn, 
+                "Registrar": self.registrar}
 
     # Retrieve information
     def retrieve(self, query, key):
@@ -1208,6 +1275,7 @@ class VtIP(Virustotal):
 
 
 # Virustotal Url Sub-Class ###############################################################################################
+@dataclasses.dataclass
 class VtUrl(Virustotal):
     
     # Class Initialiser
@@ -1245,6 +1313,17 @@ class VtUrl(Virustotal):
     def setResponse(self, response):
         self.response = response
 
+    def todict(self):
+        detect = {}
+        category = {}
+        for item in self.detections:
+            detect[item[0].replace('.', '')] = item[1]
+        for item in self.detections:
+            category[item[0].replace('.', '')] = item[1]
+        return {"Clean Detection": self.cleanDetection, "Malicious Detection": self.malDetection, "Undetected": self.undetected, "Suspicious Detection": self.susDetection, 
+                "Detections": detect, "First Submitted": self.firstSubmitted, "Last Submitted": self.lastSubmitted, "Total Submissions": self.totalSubmissions, 
+                "Report Link": self.reportLink, "Categories": category, "Final URL": self.finalUrl, "Site Title": self.siteTitle, "Content Type": self.contentType, 
+                "Server": self.server, "Response": self.response}
     
     # Retrieve information
     def retrieve(self, query, key):

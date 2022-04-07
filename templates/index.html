@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Isidore ~ Home</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <link href='https://fonts.googleapis.com/css?family=Alata' rel='stylesheet'>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+</head>
+<body style="background-image: url('../static/home_background.png'); background-repeat: no-repeat; background-size: cover;">
+
+  <div class="wrapper">
+
+    <!-- Preloader -->
+    <div class="preloader flex-column justify-content-center align-items-center">
+      <img class="animation__shake" src="../static/logo.png" alt="Isidore" height="60" width="60">
+    </div>
+  </div>
+
+
+  <!-- Content Wrapper. Contains page content -->
+  <img class="img-fluid" src="../static/betaheader.png" alt="Isidore Header" style="width: 100%; object-fit: cover; margin-top: 1em;">
+
+  <div class="row justify-content-evenly">
+    <div class="col">
+      <center>
+        <img class="img-fluid" src="../static/team.jpg" alt="Team" style="width: 80%; object-fit: cover; border-radius: 3em; border: 5px solid #BA8A49;">
+        <br><br><br><br>
+        <p style="text-align: left; color: white; font-size: 24px; margin-left: 4em;">
+          Isidore is an open-source platform built for Cybersecurity professionals which aims to make information gathering in SOC environments easier. <br><br>Isidore allows users to query several great information resources such as Virustotal, UrlScan, and Greynoise, etc. which returns all of the information on one page in a neat and tidy fashion. <br><br>With Isidore, you can use your API keys from any of the integrated services to query information on a large scale and at a much quicker speed than the manual process.
+        </p>
+      </center>
+    </div>
+    <div class="col">
+
+      <div id="auth" class="carousel slide" data-bs-interval="false">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <center>
+              <div style="width: 80%; border-radius: 3em; border: 5px solid #BA8A49;">
+                <br>
+                <h3 style="color: white;">Login</h3>
+                <br><br>
+                <form action="/login" method="POST">
+                  <h4 style="color: white;">Email Address</h4>
+                  <input type="email" name="loginemail" class="form-control" id="exampleFormControlInput1" placeholder="Enter your email" style="width: 60%">
+                  <br><br>
+                  <h4 style="color: white;">Password</h4>
+                  <input type="Password" name="loginpw" class="form-control" id="exampleFormControlInput2" placeholder="Enter your password" style="width: 60%">
+                  <br><br>
+                  <button type="submit" class="btn btn btn-lg" style="background-color: #BA8A49; color: white;">Login</button>
+                </form>
+                <br>
+                <hr  style="width: 80%; background-color: #BA8A49; border: 3px solid #BA8A49;">
+
+                <a style="background-color: #BA8A49; color: white;" role="button" href="#auth" class="btn btn btn-lg" data-slide="next">Sign-Up Instead</a>
+                <br><br>
+              </div>
+            </center>
+          </div>
+          <div class="carousel-item">
+            <center>
+              <div style="width: 80%; border-radius: 3em; border: 5px solid #BA8A49;">
+                <br>
+                <h3 style="color: white;">Sign-Up</h3>
+                <br><br>
+                <form action="/signup" method="POST">
+                  <h4 style="color: white;">Email Address</h4>
+                  <input type="email" name="signemail" class="form-control" id="exampleFormControlInput3" placeholder="Enter your email" style="width: 60%">
+                  <br><br>
+                  <h4 style="color: white;">Password</h4>
+                  <input type="Password" name="signpw" class="form-control" id="exampleFormControlInput4" placeholder="Enter your password" style="width: 60%">
+                  <br><br>
+                  <button type="submit" class="btn btn btn-lg" style="background-color: #BA8A49; color: white;">Sign-Up</button>
+                </form>
+                <br>
+                <hr  style="width: 80%; background-color: #BA8A49; border: 3px solid #BA8A49;">
+
+                <a style="background-color: #BA8A49; color: white;" role="button" href="#auth" class="btn btn btn-lg" data-slide="prev">Login Instead</a>
+                <br><br>
+              </div>
+            </center>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br><br>
+  <footer class="main-footer" style="color: white; font-size: 1.5em;">
+    <center>Isidore was created by <strong><a href="https://callum-fiekert.com" target="_blank" style="color: #BA8A49;">Callum Fiekert</a></strong></center>
+  </footer>
+  
+
+<!-- jQuery -->
+<script src="../static/plugins/jquery/jquery.min.js"></script>
+<script src="../static/plugins/jquery-ui/jquery-ui.min.js"></script>
+<script>
+  $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script src="../static/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../static/dist/js/adminlte.js"></script>
+<script src="../static/dist/js/demo.js"></script>
+<script src="../static/dist/js/pages/dashboard.js"></script>
+
+<script type="text/javascript">
+  if ({{ keyAdded | safe}} == 1) {
+    toastr.success('API Key successfully added!')
+  } else if ({{ keyAdded | safe}} == 2) {
+    toastr.error('Unable to add API key')
+  } else if ({{ keyAdded | safe}} == 3) {
+    toastr.warning('Please enter an API key!')
+  }
+</script>
+
+<div id="toastsContainerTopRight" class="toasts-top-right fixed"></div>
+</body>
+</html>

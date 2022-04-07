@@ -1,15 +1,68 @@
 # Project Imports
-from flask import Flask, request, render_template
+from attr import asdict
+from flask import Flask, request, render_template, redirect
+from matplotlib.pyplot import hist
 from api import HybridAnalysis, Urlscan, VtUrl, VtIP, VtDomain, VtFileHash, AbuseIP, Greynoise, Shodan, IPinfo
 from system import Settings, UrlQuery, IPQuery, DomainQuery, FileHashQuery, initialise
-import os, webbrowser, hashlib, datetime
+import os, webbrowser, hashlib, datetime, pyrebase
+import json
+from json import JSONEncoder
 
 # Defining Flask App
 app = Flask(__name__)
 
-userSettings = Settings("", "", "", "", "", "")
-initialise(userSettings)
+config = {
+    "apiKey": "AIzaSyAzydxPiVakaZdrKMZ5e2aqXsOxXKeb6CM",
+    "authDomain": "isidore-5c6c3.firebaseapp.com",
+    "databaseURL": "https://isidore-5c6c3-default-rtdb.europe-west1.firebasedatabase.app/",
+    "projectId": "isidore-5c6c3",
+    "storageBucket": "isidore-5c6c3.appspot.com",
+    "messagingSenderId": "616530519567",
+    "appId": "1:616530519567:web:85d62ec1e197137b16257a"
+}
 
+firebase = pyrebase.initialize_app(config)
+db = firebase.database()
+auth = firebase.auth()
+userSettings = Settings("", "", "", "", "", "")
+
+class QueryEncoder(JSONEncoder):
+        def default(self, o):
+            return o.__dict__
+
+@app.route("/", methods=["POST", "GET"])
+def index():
+    return render_template("index.html")
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        # try:
+        if request.form["loginemail"] != None and request.form["loginpw"] != None:
+            email = request.form["loginemail"]
+            password = request.form["loginpw"]
+            auth.sign_in_with_email_and_password(email, password)
+            user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+            initialise(userSettings, user)
+            return redirect("/home")
+        # except:
+        #     print("Error")
+        #     return redirect("/")
+    return redirect("/")
+
+@app.route("/signup", methods=["POST", "GET"])
+def signup():
+    if request.method == "POST":
+        try:
+            if request.form["signemail"] != None and request.form["signpw"] != None:
+                email = request.form["signemail"]
+                password = request.form["signpw"]
+                auth.create_user_with_email_and_password(email, password)
+                return redirect("/home")
+        except:
+            print("Error")
+            return redirect("/")
+    return redirect("/")
 
 # Home page
 @app.route("/home", methods=["POST", "GET"])
@@ -28,76 +81,56 @@ def home():
             else:
                 # Update the user settings
                 userSettings.updateApiKey(service, key)
-                f = open("keys.txt", "w")
-                f.write("VT:" + userSettings.virustotalKey + "\n")
-                f.write("US:" + userSettings.urlscanKey + "\n")
-                f.write("HA:" + userSettings.hybridAnalysisKey + "\n")
-                f.write("AIP:" + userSettings.abuseIPKey + "\n")
-                f.write("SH:" + userSettings.shodanKey + "\n")
-                f.write("IP:" + userSettings.ipInfoKey + "\n")
-                f.close()
-                # Return a success notification
-                
                 keyAdded = 1
         except:
             # Return an error notification
             keyAdded = 2
 
-    # Initialises the home page search history
-    result=[]
     table = ""
-    count=0
-    # Grabs the 3 most recents query searches
-    f = open("searchHistory.txt", "r+")
-    for line in f:
-        result.clear()
-        result.append(line.split('|')[0])
-        result.append(line.split('|')[1])
-        result.append(line.split('|')[2])
-        result.append(line.split('|')[3])
-        count= count+1
-        name = result[1]
-        if len(name) > 40:
-            name = name[:40] + "\n" + name[40:]
-        table = "<tr class='odd'><td class='sorting_1 dtr-control' tabindex='0' style=>" + result[0] + "</td> <td>" + name + "</td> <td>" + result[2] + "</td> <td>" + result[3] + "</td></tr>" + table
-    f.close()
-    # Displays the 3 most recent query searches on the homepage
-    if count >= 3:
-        short = table.split("<tr class='odd'>")[1] + table.split("<tr class='odd'>")[2] + table.split("<tr class='odd'>")[3]
-    elif count == 2:
-        short = table.split("<tr class='odd'>")[1] + table.split("<tr class='odd'>")[2]
-    elif count == 1:
-        short = table.split("<tr class='odd'>")[1]
-    else:
-        short=""
+    user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+    history = db.child("Settings").child(user).child("History").get()
+    times= []
+    if history.val() != None:
+        for item in history.each():
+            times.append(datetime.datetime.strptime(item.val()["Time"], "%d/%m/%Y %H:%M:%S"))
+        times.sort(reverse=True)
+        times = times[:3]
+        for time in times:
+            for item in history.each():
+                if time == datetime.datetime.strptime(item.val()["Time"], "%d/%m/%Y %H:%M:%S"):
+                    name = item.val()["Query"]
+                    if len(name) > 40:
+                        name = name[:40] + "\n" + name[40:]
+                    table = "<tr class='odd'><td class='sorting_1 dtr-control' tabindex='0' style=>" + item.val()["Time"] + "</td> <td>" + name + "</td> <td>" + str(item.val()["VT Malicious Detections"]) + " malicious detections out of " + str(item.val()["VT Total Detections"]) + "</td> <td>" + item.val()["Type"] + "</td></tr>" + table
 
     # Returns the Home page
-    return render_template("home.html", info=short, keyAdded=keyAdded)
+    return render_template("home.html", info=table, keyAdded=keyAdded)
 
 # Search History page
 @app.route("/history", methods=["POST", "GET"])
 def history():
     table = ""
-    # Reads in the query search history
-    f = open("searchHistory.txt", "r+")
-    result=[]
-    for line in f:
-        result.clear()
-        result.append(line.split('|')[0])
-        result.append(line.split('|')[1])
-        result.append(line.split('|')[2])
-        result.append(line.split('|')[3])
-        table = "<tr><td scope='row'>" + result[0] + "</td> <td>" + result[1] + "</td> <td>" + result[2] + "</td> <td>" + result[3] + "</td></tr>" + table
-    f.close()
+    user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+    history = db.child("Settings").child(user).child("History").get()
+    times= []
+    if history.val() != None:
+        for item in history.each():
+            times.append(datetime.datetime.strptime(item.val()["Time"], "%d/%m/%Y %H:%M:%S"))
+        times.sort(reverse=True)
+        for time in times:
+            for item in history.each():
+                if time == datetime.datetime.strptime(item.val()["Time"], "%d/%m/%Y %H:%M:%S"):
+                    name = item.val()["Query"]
+                    if len(name) > 40:
+                        name = name[:40] + "\n" + name[40:]
+                    table = "<tr class='odd'><td class='sorting_1 dtr-control' tabindex='0' style=>" + item.val()["Time"] + "</td> <td>" + name + "</td> <td>" + str(item.val()["VT Malicious Detections"]) + " malicious detections out of " + str(item.val()["VT Total Detections"]) + "</td> <td>" + item.val()["Type"] + "</td></tr>" + table
     # Loads the page with the query search history
     return render_template("history.html", info=table)
 
 @app.route('/clear')
 def clear():
-    # Deletes all content from the query search history storage
-    f = open("searchHistory.txt", "r+")
-    f.truncate(0)
-    f.close
+    user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+    db.child("Settings").child(user).child("History").remove()
     # Returns the search history page
     return render_template("history.html", info="")
 
@@ -108,29 +141,39 @@ def settings():
     keyAdded = 0
     # Runs if POST request received
     if request.method == "POST":
-        try:
+        # try:
             # Grabs the submitted service and API key
-            service = request.form.get("service")
-            key = request.form["key"]
-            # If the key is empty, return a warning
-            if key == "":
-                keyAdded = 3
-            else:
-                # Update the user settings
-                userSettings.updateApiKey(service, key)
-                f = open("keys.txt", "w")
-                f.write("VT:" + userSettings.virustotalKey + "\n")
-                f.write("US:" + userSettings.urlscanKey + "\n")
-                f.write("HA:" + userSettings.hybridAnalysisKey + "\n")
-                f.write("AIP:" + userSettings.abuseIPKey + "\n")
-                f.write("SH:" + userSettings.shodanKey + "\n")
-                f.write("IP:" + userSettings.ipInfoKey + "\n")
-                f.close()
-                # Return a success notification
-                keyAdded = 1
-        except:
-            # Return an error notification
-            keyAdded = 2
+        service = request.form.get("service")
+        key = request.form["key"]
+        # If the key is empty, return a warning
+        if key == "":
+            keyAdded = 3
+        else:
+            # Update the user settings
+            user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+            userSettings.updateApiKey(service, key, user)
+            f = open("keys.txt", "w")
+            f.write("VT:" + userSettings.virustotalKey + "\n")
+            f.write("US:" + userSettings.urlscanKey + "\n")
+            f.write("HA:" + userSettings.hybridAnalysisKey + "\n")
+            f.write("AIP:" + userSettings.abuseIPKey + "\n")
+            f.write("SH:" + userSettings.shodanKey + "\n")
+            f.write("IP:" + userSettings.ipInfoKey + "\n")
+            f.close()
+
+            
+
+            keys = {"Virustotal": userSettings.virustotalKey, 
+                    "UrlScan": userSettings.urlscanKey, 
+                    "Hybrid Analysis": userSettings.hybridAnalysisKey,
+                    "AbuseIP": userSettings.abuseIPKey,
+                    "Shodan": userSettings.shodanKey,
+                    "IPinfo": userSettings.ipInfoKey}
+            keyAdded = 1
+
+        # except:
+        #     # Return an error notification
+        #     keyAdded = 2
 
     # Returns the Settings page
     return render_template("settings.html", keyAdded=keyAdded)
@@ -178,14 +221,19 @@ def url():
                 style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
                 count += 1
 
-                # Adds the query with its VirusTotal results to the search history
-                f = open("searchHistory.txt", "a+")
-                f.seek(0)
-                data = f.read(100)
-                if len(data) > 0:
-                    f.write("\n")
-                f.write(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "|" + query.query + "|" + str(virustotal.malDetection) + " malicious detections out of " + str(virustotal.cleanDetection + virustotal.malDetection + virustotal.susDetection + virustotal.undetected) + "|URL")
-                f.close()
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                db.child("Queries").child("URL").child(query.qId).set(query.todict())
+                print(query.submissionTime)
+                print(time)
+
+                history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                    "Query": query.query, 
+                    "VT Malicious Detections": query.virustotal.malDetection,
+                    "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                    "Type": "URL"}
+
+                db.child("Settings").child(user).child("History").child(time).set(history)
         
         return render_template("url.html", html=html, chart=chart, style=style, disabled=disabled)
 
@@ -245,14 +293,17 @@ def ip():
                 style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }#chart2div' + str(count) + ' {width: 100%; height: 400px; } '
                 count += 1
 
-                # Adds the query with its VirusTotal results to the search history
-                f = open("searchHistory.txt", "a+")
-                f.seek(0)
-                data = f.read(100)
-                if len(data) > 0:
-                    f.write("\n")
-                f.write(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "|" + query.query + "|" + str(virustotal.malDetection) + " malicious detections out of " + str(virustotal.cleanDetection + virustotal.malDetection + virustotal.susDetection + virustotal.undetected) + "|IP Address")
-                f.close()
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                db.child("Queries").child("IP").child(query.qId).set(query.todict())
+
+                history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                    "Query": query.query, 
+                    "VT Malicious Detections": query.virustotal.malDetection,
+                    "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                    "Type": "IP"}
+
+                db.child("Settings").child(user).child("History").child(time).set(history)
         
         return render_template("ip.html", html=html, chart=chart, style=style)
 
@@ -299,14 +350,17 @@ def domain():
                 style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
                 count += 1
 
-                # Adds the query with its VirusTotal results to the search history
-                f = open("searchHistory.txt", "a+")
-                f.seek(0)
-                data = f.read(100)
-                if len(data) > 0:
-                    f.write("\n")
-                f.write(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "|" + query.query + "|" + str(virustotal.malDetection) + " malicious detections out of " + str(virustotal.cleanDetection + virustotal.malDetection + virustotal.susDetection + virustotal.undetected) + "|Domain")
-                f.close()
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                db.child("Queries").child("Domain").child(query.qId).set(query.todict())
+
+                history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                    "Query": query.query, 
+                    "VT Malicious Detections": query.virustotal.malDetection,
+                    "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                    "Type": "Domain"}
+
+                db.child("Settings").child(user).child("History").child(time).set(history)
         
         return render_template("domain.html", html=html, chart=chart, style=style)
 
@@ -351,14 +405,17 @@ def filehash():
                 style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
                 count += 1
 
-                # Adds the query with its VirusTotal results to the search history
-                f = open("searchHistory.txt", "a+")
-                f.seek(0)
-                data = f.read(100)
-                if len(data) > 0:
-                    f.write("\n")
-                f.write(datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "|" + query.query + "|" + str(virustotal.malDetection) + " malicious detections out of " + str(virustotal.cleanDetection + virustotal.malDetection + virustotal.susDetection + virustotal.undetected) + "|File Hash")
-                f.close()
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                db.child("Queries").child("Filehash").child(query.qId).set(query.todict())
+
+                history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                    "Query": query.query, 
+                    "VT Malicious Detections": query.virustotal.malDetection,
+                    "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                    "Type": "Filehash"}
+
+                db.child("Settings").child(user).child("History").child(time).set(history)
         
         return render_template("filehash.html", html=html, chart=chart, style=style)
 
@@ -370,5 +427,5 @@ def filehash():
 
 # Instanciates the Flask server and opens the dashboard automatically on localhost
 if __name__ == "__main__":
-    webbrowser.open_new("http://127.0.0.1:5000/home")
+    webbrowser.open_new("http://127.0.0.1:5000/")
     app.run(debug=False)

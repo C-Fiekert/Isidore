@@ -1,21 +1,39 @@
-import re, os, datetime
+import re, os, datetime, pyrebase, dataclasses, hashlib
 
-def initialise(userSettings):
+config = {
+    "apiKey": "AIzaSyAzydxPiVakaZdrKMZ5e2aqXsOxXKeb6CM",
+    "authDomain": "isidore-5c6c3.firebaseapp.com",
+    "databaseURL": "https://isidore-5c6c3-default-rtdb.europe-west1.firebasedatabase.app/",
+    "projectId": "isidore-5c6c3",
+    "storageBucket": "isidore-5c6c3.appspot.com",
+    "messagingSenderId": "616530519567",
+    "appId": "1:616530519567:web:85d62ec1e197137b16257a"
+}
+
+firebase = pyrebase.initialize_app(config)
+db = firebase.database()
+auth = firebase.auth()
+
+def initialise(userSettings, user):
     # Read in API keys from text file
-    cwd = os.path.dirname(os.path.abspath(__file__))
-    os.chdir(cwd)
-    f = open("keys.txt", "r")
 
-    userSettings.setVirustotalKey(f.readline()[3:-1])
-    userSettings.setURLScanKey(f.readline()[3:-1])
-    userSettings.setHybridAnalysisKey(f.readline()[3:-1])
-    userSettings.setAbuseIPKey(f.readline()[4:-1])
-    userSettings.setShodanKey(f.readline()[3:-1])
-    userSettings.setIPInfoKey(f.readline()[3:-1])
-    f.close()
-
+    keys = db.child("Settings").child(user).child("Keys").get()
+    for item in keys.each():
+        if item.key() == "Virustotal":
+            userSettings.setVirustotalKey(item.val())
+        elif item.key() == "UrlScan":
+            userSettings.setURLScanKey(item.val())
+        elif item.key() == "Hybrid Analysis":
+            userSettings.setHybridAnalysisKey(item.val())
+        elif item.key() == "AbuseIP":
+            userSettings.setAbuseIPKey(item.val())
+        elif item.key() == "Shodan":
+            userSettings.setShodanKey(item.val())
+        elif item.key() == "IPinfo":
+            userSettings.setIPInfoKey(item.val())
 
 # Query Class #######################################################################################################
+@dataclasses.dataclass
 class Query:
     
     # Class Initialiser
@@ -37,6 +55,7 @@ class Query:
         self.submissionTime = submissionTime
 
 # Domain Query Sub-Class ############################################################################################
+@dataclasses.dataclass
 class DomainQuery(Query):
     
     # Class Initialiser
@@ -58,6 +77,10 @@ class DomainQuery(Query):
     # UrlScan object setter
     def setUrlscan(self, urlscan):
         self.urlscan = urlscan
+
+    def todict(self):
+        return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
+        "Virustotal": self.virustotal.todict(), "UrlScan": self.urlscan.todict()}
  
     # Fixes defanged Domain names
     def defang(self):
@@ -86,6 +109,7 @@ class DomainQuery(Query):
         return chart
 
 # File Hash Query Sub-Class #########################################################################################
+@dataclasses.dataclass
 class FileHashQuery(Query):
     
     # Class Initialiser
@@ -107,6 +131,10 @@ class FileHashQuery(Query):
     # Hybrid Analysis object setter
     def setHybridAnalysis(self, hybridAnalysis):
         self.hybridAnalysis = hybridAnalysis
+
+    def todict(self):
+        return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
+        "Virustotal": self.virustotal.todict(), "Hybrid Analysis": self.hybridAnalysis.todict()}
 
     # Validates Domains
     def validate(self):
@@ -130,6 +158,7 @@ class FileHashQuery(Query):
         return chart
 
 # IP Address Query Sub-Class ########################################################################################
+@dataclasses.dataclass
 class IPQuery(Query):
     
     # Class Initialiser
@@ -166,6 +195,11 @@ class IPQuery(Query):
     # IPInfo object setter
     def setIPInfo(self, ipinfo):
         self.ipInfo = ipinfo
+
+    def todict(self):
+        return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
+        "Virustotal": self.virustotal.todict(), "AbuseIP": self.abuseIP.todict(), "Greynoise": self.greynoise.todict(), 
+        "Shodan": self.shodan.todict(), "IPinfo": self.ipInfo.todict()}
  
     # Fixes defanged IP Addresses
     def defang(self):
@@ -196,6 +230,7 @@ class IPQuery(Query):
         return chart
 
 # Url Query Sub-Class ###############################################################################################
+@dataclasses.dataclass
 class UrlQuery(Query):
     
     # Class Initialiser
@@ -222,6 +257,10 @@ class UrlQuery(Query):
     # Hybrid Analysis object setter
     def setHybridAnalysis(self, hybridAnalysis):
         self.hybridAnalysis = hybridAnalysis
+
+    def todict(self):
+        return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
+        "Virustotal": self.virustotal.todict(), "UrlScan": self.urlscan.todict(), "Hybrid Analysis": self.hybridAnalysis.todict()}
  
     # Fixes defanged URLs
     def defang(self):
@@ -261,6 +300,7 @@ class UrlQuery(Query):
         return chart
 
 # Settings Class ########################################################################################################
+@dataclasses.dataclass
 class Settings:
     
     # Class Initialiser
@@ -296,17 +336,27 @@ class Settings:
     def setIPInfoKey(self, key):
         self.ipInfoKey = key
 
+    def todict(self):
+        return {"VTkey": self.virustotalKey, "USkey": self.urlscanKey, "HAkey": self.hybridAnalysisKey, "AIPkey": self.abuseIPKey, 
+        "SHkey": self.shodanKey, "IPkey": self.ipInfoKey}
+
     # Update API key in Settings
-    def updateApiKey(self, service, key):
+    def updateApiKey(self, service, key, user):
         if service == "1":
             self.setVirustotalKey(key)
+            db.child("Settings").child(user).child("Keys").update({"Virustotal": key})
         elif service == "2":
             self.setURLScanKey(key)
+            db.child("Settings").child(user).child("Keys").update({"UrlScan": key})
         elif service == "3":
             self.setHybridAnalysisKey(key)
+            db.child("Settings").child(user).child("Keys").update({"Hybrid Analysis": key})
         elif service == "4":
             self.setAbuseIPKey(key)
+            db.child("Settings").child(user).child("Keys").update({"AbuseIP": key})
         elif service == "5":
             self.setShodanKey(key)
+            db.child("Settings").child(user).child("Keys").update({"Shodan": key})
         elif service == "6":
             self.setIPInfoKey(key)
+            db.child("Settings").child(user).child("Keys").update({"IPinfo": key})
