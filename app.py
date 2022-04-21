@@ -1,12 +1,8 @@
 # Project Imports
-from attr import asdict
 from flask import Flask, request, render_template, redirect
-from matplotlib.pyplot import hist
 from api import HybridAnalysis, Urlscan, VtUrl, VtIP, VtDomain, VtFileHash, AbuseIP, Greynoise, Shodan, IPinfo
 from system import Settings, UrlQuery, IPQuery, DomainQuery, FileHashQuery, initialise
-import os, webbrowser, hashlib, datetime, pyrebase
-import json
-from json import JSONEncoder
+import webbrowser, hashlib, datetime, pyrebase
 
 # Defining Flask App
 app = Flask(__name__)
@@ -25,10 +21,8 @@ firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 auth = firebase.auth()
 userSettings = Settings("", "", "", "", "", "")
-
-class QueryEncoder(JSONEncoder):
-        def default(self, o):
-            return o.__dict__
+search = ""
+cache = []
 
 @app.route("/", methods=["POST", "GET"])
 def index():
@@ -58,6 +52,7 @@ def signup():
                 email = request.form["signemail"]
                 password = request.form["signpw"]
                 auth.create_user_with_email_and_password(email, password)
+                auth.sign_in_with_email_and_password(email, password)
                 return redirect("/home")
         except:
             print("Error")
@@ -116,7 +111,7 @@ def history():
     if history.val() != None:
         for item in history.each():
             times.append(datetime.datetime.strptime(item.val()["Time"], "%d/%m/%Y %H:%M:%S"))
-        times.sort(reverse=True)
+        times.sort(reverse=False)
         for time in times:
             for item in history.each():
                 if time == datetime.datetime.strptime(item.val()["Time"], "%d/%m/%Y %H:%M:%S"):
@@ -132,7 +127,7 @@ def clear():
     user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
     db.child("Settings").child(user).child("History").remove()
     # Returns the search history page
-    return render_template("history.html", info="")
+    return redirect("/history")
 
 # Settings page
 @app.route("/settings", methods=["POST", "GET"])
@@ -181,51 +176,41 @@ def settings():
 # URL page
 @app.route("/url", methods=["POST", "GET"])
 def url():
-    global userSettings
+    global userSettings, search
     disabled = "disabled"
 
     # Runs if POST request received
     if request.method == "POST":
         # try:
         userQueries = request.form["query"]
+        search = request.form["query"]
         userQueries = userQueries.split(' ')
         html, chart, style = "", "", ""
         count = 0
         disabled = ""
         for input in userQueries:
-        
+            cached = False
             query = UrlQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "URL", "", "", "")
             query.defang()
             qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
             query.setQID(qId)
 
-            if query.validate():
-                virustotal = VtUrl("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
-                virustotal.retrieve(query.query, userSettings.virustotalKey)
-                virustotalCard = virustotal.generate(count)
+            for item in cache:
+                if item.qId == query.qId:
+                    query = item
+                    cached = True
+                    break
+            
+            if cached:
+                print("Cached")
+                virustotalCard = query.virustotal.generate(count)
+                urlscanCard = query.urlscan.generate(count)
+                hybridAnalysisCard = query.hybridAnalysis.generate("url")
 
-                urlscan = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
-                urlscan.retrieve(query.query, userSettings.urlscanKey)
-                urlscanCard = urlscan.generate(count)
-
-                hybridAnalysis = HybridAnalysis("", "", "")
-                hybridAnalysis.retrieve(query.query, "url", userSettings.hybridAnalysisKey)
-                hybridAnalysisCard = hybridAnalysis.generate("url")
-
-                query.setVirustotal(virustotal)
-                query.setUrlscan(urlscan)
-                query.setHybridAnalysis(hybridAnalysis)
-
-                html += query.generateHTML(virustotalCard, urlscanCard, hybridAnalysisCard, count)
-                chart += query.generateChart(virustotal, count)
+                html += query.generateHTML(query.submissionTime, virustotalCard, urlscanCard, hybridAnalysisCard, count)
+                chart += query.generateChart(query.virustotal, count)
                 style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
                 count += 1
-
-                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
-                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
-                db.child("Queries").child("URL").child(query.qId).set(query.todict())
-                print(query.submissionTime)
-                print(time)
 
                 history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
                     "Query": query.query, 
@@ -233,69 +218,194 @@ def url():
                     "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
                     "Type": "URL"}
 
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
                 db.child("Settings").child(user).child("History").child(time).set(history)
+
+            else:
+                stored = False
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                history = db.child("Queries").child("URL").child(query.qId).get()
+                if history.val() != None:
+                    stored = True
+                    query = query.fromdict(history)
+
+                if stored:
+                    print("Stored")
+                    virustotalCard = query.virustotal.generate(count)
+                    urlscanCard = query.urlscan.generate(count)
+                    hybridAnalysisCard = query.hybridAnalysis.generate("url")
+
+                    html += query.generateHTML(history.val()["Submission Time"], virustotalCard, urlscanCard, hybridAnalysisCard, count)
+                    chart += query.generateChart(query.virustotal, count)
+                    style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+                    count += 1
+
+                    if len(cache) < 5:
+                        cache.append(query)
+                    else:
+                        cache.pop(0)
+                        cache.append(query)
+
+                    history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                        "Query": query.query, 
+                        "VT Malicious Detections": query.virustotal.malDetection,
+                        "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                        "Type": "URL"}
+
+                    user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                    time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                    db.child("Settings").child(user).child("History").child(time).set(history)
+
+                else:
+                    if query.validate():
+                        print("Query")
+                        virustotal = VtUrl("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                        virustotal.retrieve(query.query, userSettings.virustotalKey)
+                        virustotalCard = virustotal.generate(count)
+
+                        urlscan = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                        urlscan.retrieve(query.query, userSettings.urlscanKey)
+                        urlscanCard = urlscan.generate(count)
+
+                        hybridAnalysis = HybridAnalysis("", "", "")
+                        hybridAnalysis.retrieve(query.query, "url", userSettings.hybridAnalysisKey)
+                        hybridAnalysisCard = hybridAnalysis.generate("url")
+
+                        query.setVirustotal(virustotal)
+                        query.setUrlscan(urlscan)
+                        query.setHybridAnalysis(hybridAnalysis)
+
+                        html += query.generateHTML(query.submissionTime, virustotalCard, urlscanCard, hybridAnalysisCard, count)
+                        chart += query.generateChart(virustotal, count)
+                        style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+                        count += 1
+
+                        user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                        time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                        db.child("Queries").child("URL").child(query.qId).set(query.todict())
+
+                        if len(cache) < 5:
+                            cache.append(query)
+                        else:
+                            cache.pop(0)
+                            cache.append(query)
+
+                        history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                            "Query": query.query, 
+                            "VT Malicious Detections": query.virustotal.malDetection,
+                            "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                            "Type": "URL"}
+
+                        db.child("Settings").child(user).child("History").child(time).set(history)
         
-        return render_template("url.html", html=html, chart=chart, style=style, disabled=disabled)
+        return render_template("url.html", html=html, chart=chart, style=style, value=query.query, disabled=disabled)
 
         # except:
         #     return render_template("url.html")
     # Returns the URL Query page
     return render_template("url.html", disabled=disabled)
 
+# URL page
+@app.route("/url-analyse", methods=["POST", "GET"])
+def urlAnalyse():
+    global userSettings, search
+    disabled = "disabled"
+
+    # try:
+    userQueries = search
+    userQueries = userQueries.split(' ')
+    html, chart, style = "", "", ""
+    count = 0
+    for input in userQueries:
+        query = UrlQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "URL", "", "", "")
+        query.defang()
+        qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
+        query.setQID(qId)
+
+        if query.validate():
+            print("Re-Analysing")
+            virustotal = VtUrl("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+            virustotal.retrieve(query.query, userSettings.virustotalKey)
+            virustotalCard = virustotal.generate(count)
+
+            urlscan = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
+            urlscan.retrieve(query.query, userSettings.urlscanKey)
+            urlscanCard = urlscan.generate(count)
+
+            hybridAnalysis = HybridAnalysis("", "", "")
+            hybridAnalysis.retrieve(query.query, "url", userSettings.hybridAnalysisKey)
+            hybridAnalysisCard = hybridAnalysis.generate("url")
+
+            query.setVirustotal(virustotal)
+            query.setUrlscan(urlscan)
+            query.setHybridAnalysis(hybridAnalysis)
+
+            html += query.generateHTML(query.submissionTime, virustotalCard, urlscanCard, hybridAnalysisCard, count)
+            chart += query.generateChart(virustotal, count)
+            style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+            count += 1
+
+            user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+            time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+            db.child("Queries").child("URL").child(query.qId).set(query.todict())
+
+            if len(cache) < 5:
+                cache.append(query)
+            else:
+                cache.pop(0)
+                cache.append(query)
+
+            history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Query": query.query, 
+                "VT Malicious Detections": query.virustotal.malDetection,
+                "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                "Type": "URL"}
+
+            db.child("Settings").child(user).child("History").child(time).set(history)
+    
+    return render_template("url.html", html=html, chart=chart, style=style, disabled=disabled)
+
 # IP Address page
 @app.route("/ip", methods=["POST", "GET"])
 def ip():
-    global userSettings
+    global userSettings, search
+    disabled = "disabled"
     
     # Runs if POST request received
     if request.method == "POST":
         # try:
         userQueries = request.form["query"]
+        search = request.form["query"]
         userQueries = userQueries.split(' ')
         html, chart, style = "", "", ""
         count = 0
+        disabled = ""
         for input in userQueries:
-        
+            cached = False
             query = IPQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "IP Address", "", "", "", "", "")
             query.defang()
             qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
             query.setQID(qId)
 
-            if query.validate():
-                virustotal = VtIP("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
-                virustotal.retrieve(query.query, userSettings.virustotalKey)
-                virustotalCard = virustotal.generate(count)
+            for item in cache:
+                if item.qId == query.qId:
+                    query = item
+                    cached = True
+                    break
+            
+            if cached:
+                print("Cached")
+                virustotalCard = query.virustotal.generate(count)
+                abuseIpCard = query.abuseIP.generate(count)
+                greynoiseCard = query.greynoise.generate()
+                shodanCard = query.shodan.generate(count)
+                ipInfoCard = query.ipInfo.generate()
 
-                abuseIp = AbuseIP("", "", "", "", "", "", "", "", "", "", "", "")
-                abuseIp.retrieve(query.query, userSettings.abuseIPKey)
-                abuseIpCard = abuseIp.generate(count)
-
-                greynoise = Greynoise("", "", "", "", "", "", "")
-                greynoise.retrieve(query.query)
-                greynoiseCard = greynoise.generate()
-
-                shodan = Shodan("", "", "", "", "", "", "", "", "", "", "", "")
-                shodan.retrieve(query.query, userSettings.shodanKey)
-                shodanCard = shodan.generate(count)
-
-                ipInfo = IPinfo("", "", "", "", "", "", "", "", "", "")
-                ipInfo.retrieve(query.query, userSettings.ipInfoKey)
-                ipInfoCard = ipInfo.generate()
-
-                query.setVirustotal(virustotal)
-                query.setAbuseIP(abuseIp)
-                query.setGreynoise(greynoise)
-                query.setShodan(shodan)
-                query.setIPInfo(ipInfo)
-
-                html += query.generateHTML(virustotalCard, abuseIpCard, greynoiseCard, shodanCard, ipInfoCard, count)
-                chart += query.generateChart(virustotal, abuseIp, count)
+                html += query.generateHTML(query.submissionTime, virustotalCard, abuseIpCard, greynoiseCard, shodanCard, ipInfoCard, count)
+                chart += query.generateChart(query.virustotal, query.abuseIP, count)
                 style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }#chart2div' + str(count) + ' {width: 100%; height: 400px; } '
                 count += 1
-
-                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
-                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
-                db.child("Queries").child("IP").child(query.qId).set(query.todict())
 
                 history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
                     "Query": query.query, 
@@ -303,56 +413,213 @@ def ip():
                     "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
                     "Type": "IP"}
 
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
                 db.child("Settings").child(user).child("History").child(time).set(history)
+
+            else:
+                stored = False
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                history = db.child("Queries").child("IP").child(query.qId).get()
+                if history.val() != None:
+                    stored = True
+                    query = query.fromdict(history)
+
+                if stored:
+                    print("Stored")
+                    virustotalCard = query.virustotal.generate(count)
+                    abuseIpCard = query.abuseIP.generate(count)
+                    greynoiseCard = query.greynoise.generate()
+                    shodanCard = query.shodan.generate(count)
+                    ipInfoCard = query.ipInfo.generate()
+
+                    html += query.generateHTML(history.val()["Submission Time"], virustotalCard, abuseIpCard, greynoiseCard, shodanCard, ipInfoCard, count)
+                    chart += query.generateChart(query.virustotal, query.abuseIP, count)
+                    style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }#chart2div' + str(count) + ' {width: 100%; height: 400px; } '
+                    count += 1
+
+                    if len(cache) < 5:
+                        cache.append(query)
+                    else:
+                        cache.pop(0)
+                        cache.append(query)
+
+                    history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                        "Query": query.query, 
+                        "VT Malicious Detections": query.virustotal.malDetection,
+                        "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                        "Type": "IP"}
+
+                    user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                    time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                    db.child("Settings").child(user).child("History").child(time).set(history)
+                else:
+                    if query.validate():
+                        print("Query")
+                        virustotal = VtIP("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                        virustotal.retrieve(query.query, userSettings.virustotalKey)
+                        virustotalCard = virustotal.generate(count)
+
+                        abuseIp = AbuseIP("", "", "", "", "", "", "", "", "", "", "", "")
+                        abuseIp.retrieve(query.query, userSettings.abuseIPKey)
+                        abuseIpCard = abuseIp.generate(count)
+
+                        greynoise = Greynoise("", "", "", "", "", "", "")
+                        greynoise.retrieve(query.query)
+                        greynoiseCard = greynoise.generate()
+
+                        shodan = Shodan("", "", "", "", "", "", "", "", "", "", "", "")
+                        shodan.retrieve(query.query, userSettings.shodanKey)
+                        shodanCard = shodan.generate(count)
+
+                        ipInfo = IPinfo("", "", "", "", "", "", "", "", "", "")
+                        ipInfo.retrieve(query.query, userSettings.ipInfoKey)
+                        ipInfoCard = ipInfo.generate()
+
+                        query.setVirustotal(virustotal)
+                        query.setAbuseIP(abuseIp)
+                        query.setGreynoise(greynoise)
+                        query.setShodan(shodan)
+                        query.setIPInfo(ipInfo)
+
+                        html += query.generateHTML(query.submissionTime, virustotalCard, abuseIpCard, greynoiseCard, shodanCard, ipInfoCard, count)
+                        chart += query.generateChart(virustotal, abuseIp, count)
+                        style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }#chart2div' + str(count) + ' {width: 100%; height: 400px; } '
+                        count += 1
+
+                        user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                        time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                        db.child("Queries").child("IP").child(query.qId).set(query.todict())
+
+                        if len(cache) < 5:
+                            cache.append(query)
+                        else:
+                            cache.pop(0)
+                            cache.append(query)
+
+                        history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                            "Query": query.query, 
+                            "VT Malicious Detections": query.virustotal.malDetection,
+                            "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                            "Type": "IP"}
+
+                        db.child("Settings").child(user).child("History").child(time).set(history)
         
-        return render_template("ip.html", html=html, chart=chart, style=style)
+        return render_template("ip.html", html=html, chart=chart, style=style, disabled=disabled)
 
         # except:
         #     return render_template("url.html")
     # Returns the URL Query page
-    return render_template("ip.html")
+    return render_template("ip.html", disabled=disabled)
+
+@app.route("/ip-analyse", methods=["POST", "GET"])
+def ipAnalyse():
+    global userSettings, search
+    disabled = "disabled"
+
+    # try:
+    userQueries = search
+    userQueries = userQueries.split(' ')
+    html, chart, style = "", "", ""
+    count = 0
+    for input in userQueries:
+        query = IPQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "IP Address", "", "", "", "", "")
+        query.defang()
+        qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
+        query.setQID(qId)
+
+        if query.validate():
+            print("Re-Analysing")
+            virustotal = VtIP("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+            virustotal.retrieve(query.query, userSettings.virustotalKey)
+            virustotalCard = virustotal.generate(count)
+
+            abuseIp = AbuseIP("", "", "", "", "", "", "", "", "", "", "", "")
+            abuseIp.retrieve(query.query, userSettings.abuseIPKey)
+            abuseIpCard = abuseIp.generate(count)
+
+            greynoise = Greynoise("", "", "", "", "", "", "")
+            greynoise.retrieve(query.query)
+            greynoiseCard = greynoise.generate()
+
+            shodan = Shodan("", "", "", "", "", "", "", "", "", "", "", "")
+            shodan.retrieve(query.query, userSettings.shodanKey)
+            shodanCard = shodan.generate(count)
+
+            ipInfo = IPinfo("", "", "", "", "", "", "", "", "", "")
+            ipInfo.retrieve(query.query, userSettings.ipInfoKey)
+            ipInfoCard = ipInfo.generate()
+
+            query.setVirustotal(virustotal)
+            query.setAbuseIP(abuseIp)
+            query.setGreynoise(greynoise)
+            query.setShodan(shodan)
+            query.setIPInfo(ipInfo)
+
+            html += query.generateHTML(query.submissionTime, virustotalCard, abuseIpCard, greynoiseCard, shodanCard, ipInfoCard, count)
+            chart += query.generateChart(virustotal, abuseIp, count)
+            style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }#chart2div' + str(count) + ' {width: 100%; height: 400px; } '
+            count += 1
+
+            user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+            time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+            db.child("Queries").child("IP").child(query.qId).set(query.todict())
+
+            if len(cache) < 5:
+                cache.append(query)
+            else:
+                cache.pop(0)
+                cache.append(query)
+
+            history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Query": query.query, 
+                "VT Malicious Detections": query.virustotal.malDetection,
+                "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                "Type": "IP"}
+
+            db.child("Settings").child(user).child("History").child(time).set(history)
+    
+    return render_template("ip.html", html=html, chart=chart, style=style, disabled=disabled)
+
 
 # Domain page
 @app.route("/domain", methods=["POST", "GET"])
 def domain():
     # Returns the Domain Query page
-    global userSettings
+    global userSettings, search
+    disabled = "disabled"
 
     # Runs if POST request received
     if request.method == "POST":
         # try:
         userQueries = request.form["query"]
+        search = request.form["query"]
         userQueries = userQueries.split(' ')
         html, chart, style = "", "", ""
         count = 0
         disabled = ""
         for input in userQueries:
-        
+            cached = False
             query = DomainQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "Domain", "", "")
             query.defang()
             qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
             query.setQID(qId)
 
-            if query.validate():
-                virustotal = VtDomain("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
-                virustotal.retrieve(query.query, userSettings.virustotalKey)
-                virustotalCard = virustotal.generate(count)
+            for item in cache:
+                if item.qId == query.qId:
+                    query = item
+                    cached = True
+                    break
+            
+            if cached:
+                print("Cached")
+                virustotalCard = query.virustotal.generate(count)
+                urlscanCard = query.urlscan.generate(count)
 
-                urlscan = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
-                urlscan.retrieve(query.query, userSettings.urlscanKey)
-                urlscanCard = urlscan.generate(count)
-
-                query.setVirustotal(virustotal)
-                query.setUrlscan(urlscan)
-
-                html += query.generateHTML(virustotalCard, urlscanCard, count)
-                chart += query.generateChart(virustotal, count)
+                html += query.generateHTML(query.submissionTime, virustotalCard, urlscanCard, count)
+                chart += query.generateChart(query.virustotal, count)
                 style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
                 count += 1
-
-                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
-                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
-                db.child("Queries").child("Domain").child(query.qId).set(query.todict())
 
                 history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
                     "Query": query.query, 
@@ -360,54 +627,180 @@ def domain():
                     "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
                     "Type": "Domain"}
 
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
                 db.child("Settings").child(user).child("History").child(time).set(history)
+
+            else:
+                stored = False
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                history = db.child("Queries").child("Domain").child(query.qId).get()
+                if history.val() != None:
+                    stored = True
+                    query = query.fromdict(history)
+
+                if stored:
+                    print("Stored")
+                    virustotalCard = query.virustotal.generate(count)
+                    urlscanCard = query.urlscan.generate(count)
+
+                    html += query.generateHTML(history.val()["Submission Time"], virustotalCard, urlscanCard, count)
+                    chart += query.generateChart(query.virustotal, count)
+                    style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }#chart2div' + str(count) + ' {width: 100%; height: 400px; } '
+                    count += 1
+
+                    if len(cache) < 5:
+                        cache.append(query)
+                    else:
+                        cache.pop(0)
+                        cache.append(query)
+
+                    history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                        "Query": query.query, 
+                        "VT Malicious Detections": query.virustotal.malDetection,
+                        "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                        "Type": "Domain"}
+
+                    user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                    time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                    db.child("Settings").child(user).child("History").child(time).set(history)
+
+                else:
+                    if query.validate():
+                        print("Query")
+                        virustotal = VtDomain("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                        virustotal.retrieve(query.query, userSettings.virustotalKey)
+                        virustotalCard = virustotal.generate(count)
+
+                        urlscan = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                        urlscan.retrieve(query.query, userSettings.urlscanKey)
+                        urlscanCard = urlscan.generate(count)
+
+                        query.setVirustotal(virustotal)
+                        query.setUrlscan(urlscan)
+
+                        html += query.generateHTML(query.submissionTime, virustotalCard, urlscanCard, count)
+                        chart += query.generateChart(virustotal, count)
+                        style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+                        count += 1
+
+                        user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                        time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                        db.child("Queries").child("Domain").child(query.qId).set(query.todict())
+
+                        if len(cache) < 5:
+                            cache.append(query)
+                        else:
+                            cache.pop(0)
+                            cache.append(query)
+
+                        history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                            "Query": query.query, 
+                            "VT Malicious Detections": query.virustotal.malDetection,
+                            "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                            "Type": "Domain"}
+
+                        db.child("Settings").child(user).child("History").child(time).set(history)
         
-        return render_template("domain.html", html=html, chart=chart, style=style)
+        return render_template("domain.html", html=html, chart=chart, style=style, disabled=disabled)
 
         # except:
         #     return render_template("domain.html")
     # Returns the Domain Query page
-    return render_template("domain.html")
+    return render_template("domain.html", disabled=disabled)
+
+@app.route("/domain-analyse", methods=["POST", "GET"])
+def domainAnalyse():
+    global userSettings, search
+    disabled = "disabled"
+
+    # try:
+    userQueries = search
+    userQueries = userQueries.split(' ')
+    html, chart, style = "", "", ""
+    count = 0
+    for input in userQueries:
+        query = DomainQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "Domain", "", "")
+        query.defang()
+        qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
+        query.setQID(qId)
+
+        if query.validate():
+            print("Query")
+            virustotal = VtDomain("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+            virustotal.retrieve(query.query, userSettings.virustotalKey)
+            virustotalCard = virustotal.generate(count)
+
+            urlscan = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
+            urlscan.retrieve(query.query, userSettings.urlscanKey)
+            urlscanCard = urlscan.generate(count)
+
+            query.setVirustotal(virustotal)
+            query.setUrlscan(urlscan)
+
+            html += query.generateHTML(query.submissionTime, virustotalCard, urlscanCard, count)
+            chart += query.generateChart(virustotal, count)
+            style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+            count += 1
+
+            user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+            time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+            db.child("Queries").child("Domain").child(query.qId).set(query.todict())
+
+            if len(cache) < 5:
+                cache.append(query)
+            else:
+                cache.pop(0)
+                cache.append(query)
+
+            history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Query": query.query, 
+                "VT Malicious Detections": query.virustotal.malDetection,
+                "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                "Type": "Domain"}
+
+            db.child("Settings").child(user).child("History").child(time).set(history)
+    
+    return render_template("domain.html", html=html, chart=chart, style=style, disabled=disabled)
+
 
 # File Hash page
 @app.route("/filehash", methods=["POST", "GET"])
 def filehash():
     # Returns the File Hash Query page
-    global userSettings
+    global userSettings, search
+    disabled = "disabled"
 
     # Runs if POST request received
     if request.method == "POST":
         # try:
         userQueries = request.form["query"]
+        search = request.form["query"]
         userQueries = userQueries.split(' ')
         html, chart, style = "", "", ""
         count = 0
+        disabled = ""
         for input in userQueries:
-        
+            cached = False
             query = FileHashQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "File Hash", "", "")
             qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
             query.setQID(qId)
 
-            if query.validate():
-                virustotal = VtFileHash("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
-                virustotal.retrieve(query.query, userSettings.virustotalKey)
-                virustotalCard = virustotal.generate(count)
+            for item in cache:
+                if item.qId == query.qId:
+                    query = item
+                    cached = True
+                    break
+            
+            if cached:
+                print("Cached")
+                virustotalCard = query.virustotal.generate(count)
+                hybridAnalysisCard = query.hybridAnalysis.generate(count)
 
-                hybridAnalysis = HybridAnalysis("", "", "")
-                hybridAnalysis.retrieve(query.query, "filehash", userSettings.hybridAnalysisKey)
-                hybridAnalysisCard = hybridAnalysis.generate("filehash")
-
-                query.setVirustotal(virustotal)
-                query.setHybridAnalysis(hybridAnalysis)
-
-                html += query.generateHTML(virustotalCard, hybridAnalysisCard, count)
-                chart += query.generateChart(virustotal, count)
+                html += query.generateHTML(query.submissionTime, virustotalCard, hybridAnalysisCard, count)
+                chart += query.generateChart(query.virustotal, count)
                 style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
                 count += 1
-
-                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
-                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
-                db.child("Queries").child("Filehash").child(query.qId).set(query.todict())
 
                 history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
                     "Query": query.query, 
@@ -415,14 +808,140 @@ def filehash():
                     "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
                     "Type": "Filehash"}
 
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
                 db.child("Settings").child(user).child("History").child(time).set(history)
+
+            else:
+                stored = False
+                user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                history = db.child("Queries").child("Filehash").child(query.qId).get()
+                if history.val() != None:
+                    stored = True
+                    query = query.fromdict(history)
+
+                if stored:
+                    print("Stored")
+                    virustotalCard = query.virustotal.generate(count)
+                    hybridAnalysisCard = query.hybridAnalysis.generate(count)
+
+                    html += query.generateHTML(history.val()["Submission Time"], virustotalCard, hybridAnalysisCard, count)
+                    chart += query.generateChart(query.virustotal, count)
+                    style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }#chart2div' + str(count) + ' {width: 100%; height: 400px; } '
+                    count += 1
+
+                    if len(cache) < 5:
+                        cache.append(query)
+                    else:
+                        cache.pop(0)
+                        cache.append(query)
+
+                    history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                        "Query": query.query, 
+                        "VT Malicious Detections": query.virustotal.malDetection,
+                        "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                        "Type": "Filehash"}
+
+                    user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                    time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                    db.child("Settings").child(user).child("History").child(time).set(history)
+
+                else:
+                    if query.validate():
+                        print("Query")
+                        virustotal = VtFileHash("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+                        virustotal.retrieve(query.query, userSettings.virustotalKey)
+                        virustotalCard = virustotal.generate(count)
+
+                        hybridAnalysis = HybridAnalysis("", "", "")
+                        hybridAnalysis.retrieve(query.query, "filehash", userSettings.hybridAnalysisKey)
+                        hybridAnalysisCard = hybridAnalysis.generate("filehash")
+
+                        query.setVirustotal(virustotal)
+                        query.setHybridAnalysis(hybridAnalysis)
+
+                        html += query.generateHTML(query.submissionTime, virustotalCard, hybridAnalysisCard, count)
+                        chart += query.generateChart(virustotal, count)
+                        style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+                        count += 1
+
+                        user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+                        time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+                        db.child("Queries").child("Filehash").child(query.qId).set(query.todict())
+
+                        if len(cache) < 5:
+                            cache.append(query)
+                        else:
+                            cache.pop(0)
+                            cache.append(query)
+
+                        history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                            "Query": query.query, 
+                            "VT Malicious Detections": query.virustotal.malDetection,
+                            "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                            "Type": "Filehash"}
+
+                        db.child("Settings").child(user).child("History").child(time).set(history)
         
-        return render_template("filehash.html", html=html, chart=chart, style=style)
+        return render_template("filehash.html", html=html, chart=chart, style=style, disabled=disabled)
 
         # except:
         #     return render_template("url.html")
     # Returns the URL Query page
-    return render_template("filehash.html")
+    return render_template("filehash.html", disabled=disabled)
+
+@app.route("/filehash-analyse", methods=["POST", "GET"])
+def filehashAnalyse():
+    global userSettings, search
+    disabled = "disabled"
+
+    # try:
+    userQueries = search
+    userQueries = userQueries.split(' ')
+    html, chart, style = "", "", ""
+    count = 0
+    for input in userQueries:
+        query = FileHashQuery("", input, datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), "File Hash", "", "")
+        qId = hashlib.sha256(query.query.encode('utf-8')).hexdigest()
+        query.setQID(qId)
+
+        if query.validate():
+            print("Query")
+            virustotal = VtFileHash("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+            virustotal.retrieve(query.query, userSettings.virustotalKey)
+            virustotalCard = virustotal.generate(count)
+
+            hybridAnalysis = HybridAnalysis("", "", "")
+            hybridAnalysis.retrieve(query.query, "filehash", userSettings.hybridAnalysisKey)
+            hybridAnalysisCard = hybridAnalysis.generate("filehash")
+
+            query.setVirustotal(virustotal)
+            query.setHybridAnalysis(hybridAnalysis)
+
+            html += query.generateHTML(query.submissionTime, virustotalCard, hybridAnalysisCard, count)
+            chart += query.generateChart(virustotal, count)
+            style += '#chartdiv' + str(count) + ' {width: 100%; height: 400px; }'
+            count += 1
+
+            user = hashlib.sha256(auth.current_user["email"].encode('utf-8')).hexdigest()
+            time = hashlib.sha256(query.submissionTime.encode('utf-8')).hexdigest()
+            db.child("Queries").child("Filehash").child(query.qId).set(query.todict())
+
+            if len(cache) < 5:
+                cache.append(query)
+            else:
+                cache.pop(0)
+                cache.append(query)
+
+            history = {"Time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"), 
+                "Query": query.query, 
+                "VT Malicious Detections": query.virustotal.malDetection,
+                "VT Total Detections": query.virustotal.cleanDetection + query.virustotal.malDetection + query.virustotal.susDetection + query.virustotal.undetected,
+                "Type": "Filehash"}
+
+            db.child("Settings").child(user).child("History").child(time).set(history)
+    
+    return render_template("filehash.html", html=html, chart=chart, style=style, disabled=disabled)
     
 
 # Instanciates the Flask server and opens the dashboard automatically on localhost

@@ -142,6 +142,7 @@
         <div class="row">
           <div class="col">
             <h1 class="m-0">File Hash Query</h1>
+            <a style="background-color: #0E4F61; float: right; color: white;" role="button" href="/filehash-analyse" class="btn btn btn-lg {{ disabled }}">Re-analyse <i class="fas fa-undo-alt"></i></a> 
           </div>
         </div>
       </div>
@@ -152,7 +153,7 @@
           <center>
             <form action="/filehash" method="POST">
               <div class="input-group">
-                <input type="text" name="query" class="form-control form-control-md" placeholder="Enter your Query here">
+                <input type="text" name="query" class="form-control form-control-md" placeholder="Enter your Query here" value="{{ value }}">
                 <div class="input-group-append">
                   <button type="submit" class="btn btn-md btn-default">
                     <i class="fa fa-search"></i>

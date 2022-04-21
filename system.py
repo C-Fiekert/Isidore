@@ -1,4 +1,5 @@
-import re, os, datetime, pyrebase, dataclasses, hashlib
+import re, os, datetime, pyrebase, dataclasses
+from api import HybridAnalysis, Urlscan, AbuseIP, Greynoise, IPinfo, Shodan, VtUrl, VtIP, VtDomain, VtFileHash
 
 config = {
     "apiKey": "AIzaSyAzydxPiVakaZdrKMZ5e2aqXsOxXKeb6CM",
@@ -81,6 +82,15 @@ class DomainQuery(Query):
     def todict(self):
         return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
         "Virustotal": self.virustotal.todict(), "UrlScan": self.urlscan.todict()}
+
+    def fromdict(self, item):
+        vt = VtDomain("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+        us = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
+
+        self.virustotal = vt.fromdict(item)
+        self.urlscan = us.fromdict(item)
+
+        return DomainQuery(self.qId, self.query, self.submissionTime, self.queryType, self.virustotal, self.urlscan)
  
     # Fixes defanged Domain names
     def defang(self):
@@ -96,12 +106,12 @@ class DomainQuery(Query):
         else:
             return True
 
-    def generateHTML(self, virustotal, urlscan, count):
+    def generateHTML(self, fresh, virustotal, urlscan, count):
         if count == 0:
             status = " active"
         else:
             status = ""
-        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span> </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + urlscan + '</section> </div> </div>'
+        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '<br>This information is from ' + fresh + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span> </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + urlscan + '</section> </div> </div>'
         return html
 
     def generateChart(self, virustotal, count):
@@ -136,6 +146,15 @@ class FileHashQuery(Query):
         return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
         "Virustotal": self.virustotal.todict(), "Hybrid Analysis": self.hybridAnalysis.todict()}
 
+    def fromdict(self, item):
+        vt = VtFileHash("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+        ha = HybridAnalysis("", "", "", "", "", "", "", "")
+
+        self.virustotal = vt.fromdict(item)
+        self.hybridAnalysis = ha.fromdict(item)
+
+        return FileHashQuery(self.qId, self.query, self.submissionTime, self.queryType, self.virustotal, self.hybridAnalysis)
+
     # Validates Domains
     def validate(self):
         # Checks for Domain formatting
@@ -145,12 +164,12 @@ class FileHashQuery(Query):
         else:
             return True
 
-    def generateHTML(self, virustotal, hybridanalysis, count):
+    def generateHTML(self, fresh, virustotal, hybridanalysis, count):
         if count == 0:
             status = " active"
         else:
             status = ""
-        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span> </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + hybridanalysis + '</section> </div> </div>'
+        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '<br>This information is from ' + fresh + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span> </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + hybridanalysis + '</section> </div> </div>'
         return html
 
     def generateChart(self, virustotal, count):
@@ -200,6 +219,21 @@ class IPQuery(Query):
         return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
         "Virustotal": self.virustotal.todict(), "AbuseIP": self.abuseIP.todict(), "Greynoise": self.greynoise.todict(), 
         "Shodan": self.shodan.todict(), "IPinfo": self.ipInfo.todict()}
+
+    def fromdict(self, item):
+        vt = VtIP("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+        aip = AbuseIP("", "", "", "", "", "", "", "", "", "", "", "")
+        gn = Greynoise("", "", "", "", "", "", "")
+        sh = Shodan("", "", "", "", "", "", "", "", "", "", "", "")
+        ip = IPinfo("", "", "", "", "", "", "", "", "", "")
+
+        self.virustotal = vt.fromdict(item)
+        self.abuseIP = aip.fromdict(item)
+        self.greynoise = gn.fromdict(item)
+        self.shodan = sh.fromdict(item)
+        self.ipInfo = ip.fromdict(item)
+
+        return IPQuery(self.qId, self.query, self.submissionTime, self.queryType, self.virustotal, self.abuseIP, self.greynoise, self.shodan, self.ipInfo)
  
     # Fixes defanged IP Addresses
     def defang(self):
@@ -215,12 +249,12 @@ class IPQuery(Query):
         else:
             return True
 
-    def generateHTML(self, virustotal, abuseIP, greynoise, shodan, ipInfo, count):
+    def generateHTML(self, fresh, virustotal, abuseIP, greynoise, shodan, ipInfo, count):
         if count == 0:
             status = " active"
         else:
             status = ""
-        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span>            </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + greynoise + ipInfo + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + abuseIP + shodan + '</section> </div> </div>'
+        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '<br>This information is from ' + fresh + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span>            </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + greynoise + ipInfo + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + abuseIP + shodan + '</section> </div> </div>'
         
         return html
 
@@ -261,6 +295,17 @@ class UrlQuery(Query):
     def todict(self):
         return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
         "Virustotal": self.virustotal.todict(), "UrlScan": self.urlscan.todict(), "Hybrid Analysis": self.hybridAnalysis.todict()}
+
+    def fromdict(self, item):
+        vt = VtUrl("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
+        us = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
+        ha = HybridAnalysis("", "", "", "", "", "", "", "")
+
+        self.virustotal = vt.fromdict(item)
+        self.urlscan = us.fromdict(item)
+        self.hybridAnalysis = ha.fromdict(item)
+
+        return UrlQuery(self.qId, self.query, self.submissionTime, self.queryType, self.virustotal, self.urlscan, self.hybridAnalysis)
  
     # Fixes defanged URLs
     def defang(self):
@@ -287,12 +332,12 @@ class UrlQuery(Query):
             return True
 
     
-    def generateHTML(self, virustotal, urlscan, hybridAnalysis, count):
+    def generateHTML(self, fresh, virustotal, urlscan, hybridAnalysis, count):
         if count == 0:
             status = " active"
         else:
             status = ""
-        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span>            </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + urlscan + hybridAnalysis + '</section> </div> </div>'
+        html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '<br>This information is from ' + fresh + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span>            </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + urlscan + hybridAnalysis + '</section> </div> </div>'
         return html
 
     def generateChart(self, virustotal, count):

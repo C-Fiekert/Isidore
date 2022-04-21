@@ -73,6 +73,24 @@ class AbuseIP:
         return {"IP Address": self.ipAddress, "Public IP": self.publicIP, "IP Version": self.ipVersion, "Whitelisted": self.whitelisted, 
                 "Abuse Confidence": self.abuseConfidence, "Country": self.country, "Usage Type": self.usageType, "ISP": self.isp, 
                 "Domain": self.domain, "Total Reports": self.totalReports, "Last Reported": self.lastReported, "Report Link": self.reportLink}
+
+    def fromdict(self, item):
+        self.ipAddress = item.val()["AbuseIP"]["IP Address"]
+        self.publicIP = item.val()["AbuseIP"]["Public IP"]
+        self.ipVersion = item.val()["AbuseIP"]["IP Version"]
+        self.whitelisted = item.val()["AbuseIP"]["Whitelisted"]
+        self.abuseConfidence = item.val()["AbuseIP"]["Abuse Confidence"]
+        self.country = item.val()["AbuseIP"]["Country"]
+        if "Usage Type" in item.val()["AbuseIP"]:
+            self.usageType = item.val()["AbuseIP"]["Usage Type"]
+        self.isp = item.val()["AbuseIP"]["ISP"]
+        self.domain = item.val()["AbuseIP"]["Domain"]
+        self.totalReports = item.val()["AbuseIP"]["Total Reports"]
+        self.lastReported = item.val()["AbuseIP"]["Last Reported"]
+        self.reportLink = item.val()["AbuseIP"]["Report Link"]
+
+        return AbuseIP(self.ipAddress, self.publicIP, self.ipVersion, self.whitelisted, self.abuseConfidence, self.country, self.usageType, self.isp, self.domain,
+        self.totalReports, self.lastReported, self.reportLink)
     
     # Retrieve information
     def retrieve(self, query, key):
@@ -180,6 +198,17 @@ class Greynoise:
     def todict(self):
         return {"IP Address": self.ipAddress, "Noise": self.noise, "RIOT": self.riot, "Verdict": self.verdict, 
                 "Name": self.name, "Last Seen": self.lastSeen, "Report Link": self.reportLink}
+
+    def fromdict(self, item):
+        self.ipAddress = item.val()["Greynoise"]["IP Address"]
+        self.noise = item.val()["Greynoise"]["Noise"]
+        self.riot = item.val()["Greynoise"]["RIOT"]
+        self.verdict = item.val()["Greynoise"]["Verdict"]
+        self.name = item.val()["Greynoise"]["Name"]
+        self.lastSeen = item.val()["Greynoise"]["Last Seen"]
+        self.reportLink = item.val()["Greynoise"]["Report Link"]
+
+        return Greynoise(self.ipAddress, self.noise, self.riot, self.verdict, self.name, self.lastSeen, self.reportLink)
     
     # Retrieve information
     def retrieve(self, query):
@@ -244,6 +273,18 @@ class HybridAnalysis:
     def todict(self):
         return {"Submission Name": self.submissionName, "Verdict": self.verdict, "Analysis Time": self.analysisTime, "File Type": self.filetype, 
                 "File Size": self.filesize, "MD5": self.md5, "SHA1": self.sha1, "SHA256": self.sha256}
+
+    def fromdict(self, item):
+        self.submissionName = item.val()["Hybrid Analysis"]["Submission Name"]
+        self.verdict = item.val()["Hybrid Analysis"]["Verdict"]
+        self.analysisTime = item.val()["Hybrid Analysis"]["Analysis Time"]
+        self.filetype = item.val()["Hybrid Analysis"]["File Type"]
+        self.filesize = item.val()["Hybrid Analysis"]["File Size"]
+        self.md5 = item.val()["Hybrid Analysis"]["MD5"]
+        self.sha1 = item.val()["Hybrid Analysis"]["SHA1"]
+        self.sha256 = item.val()["Hybrid Analysis"]["SHA256"]
+
+        return HybridAnalysis(self.submissionName, self.verdict, self.analysisTime, self.filetype, self.filesize, self.md5, self.sha1, self.sha256)
 
     def retrieve(self, query, type, key):
         if key == "":
@@ -425,6 +466,21 @@ class IPinfo:
                 "Country": self.country, "Postal Area": self.postalArea, "Org": self.org, "Timezone": self.timezone, 
                 "Latitude": self.latitude, "Longitude": self.longitude}
 
+    def fromdict(self, item):
+        self.ipAddress = item.val()["IPinfo"]["IP Address"]
+        self.hostName = item.val()["IPinfo"]["Hostname"]
+        self.city = item.val()["IPinfo"]["City"]
+        self.region = item.val()["IPinfo"]["Region"]
+        self.country = item.val()["IPinfo"]["Country"]
+        self.postalArea = item.val()["IPinfo"]["Postal Area"]
+        self.org = item.val()["IPinfo"]["Org"]
+        self.timezone = item.val()["IPinfo"]["Timezone"]
+        self.latitude = item.val()["IPinfo"]["Latitude"]
+        self.longitude = item.val()["IPinfo"]["Longitude"]
+
+        return IPinfo(self.ipAddress, self.hostName, self.city, self.region, self.country, self.postalArea, self.org, 
+        self.timezone, self.latitude, self.longitude)
+
     # Retrieve information
     def retrieve(self, query, key):
         if key == "":
@@ -545,7 +601,25 @@ class Shodan:
     def todict(self):
         return {"IP Address": self.ipAddress, "Country": self.country, "City": self.city, "Latitude": self.latitude, 
                 "Longitude": self.longitude, "Last Updated": self.lastUpdated, "Org": self.org, "ISP": self.isp, 
-                "ASN": self.asn, "Vulnerabilities": "N/A", "Ports": self.ports, "Report Link": self.reportLink}
+                "ASN": self.asn, "Vulnerabilities": self.vulnerabilities, "Ports": self.ports, "Report Link": self.reportLink}
+
+    def fromdict(self, item):
+        self.ipAddress = item.val()["Shodan"]["IP Address"]
+        self.country = item.val()["Shodan"]["Country"]
+        self.city = item.val()["Shodan"]["City"]
+        self.latitude = item.val()["Shodan"]["Latitude"]
+        self.longitude = item.val()["Shodan"]["Longitude"]
+        self.lastUpdated = item.val()["Shodan"]["Last Updated"]
+        self.org = item.val()["Shodan"]["Org"]
+        self.isp = item.val()["Shodan"]["ISP"]
+        self.asn = item.val()["Shodan"]["ASN"]
+        if "Vulnerabilities" in item.val()["Shodan"]:
+            self.vulnerabilities = item.val()["Shodan"]["Vulnerabilities"]
+        self.ports = item.val()["Shodan"]["Ports"]
+        self.reportLink = item.val()["Shodan"]["Report Link"]
+
+        return Shodan(self.ipAddress, self.country, self.city, self.latitude, self.longitude, self.lastUpdated, self.org, 
+        self.isp, self.asn, self.vulnerabilities, self.ports, self.reportLink)
 
     # Retrieve information
     def retrieve(self, query, key):
@@ -708,6 +782,25 @@ class Urlscan:
                 "Final URL": self.finalUrl, "IP Address": self.ipAddress, "Security Status": self.securityStatus, "Server": self.server, 
                 "Country": self.country, "City": self.city, "Registrar": self.registrar, "Registrar Date": self.registerDate, "Response": self.response, 
                 "Report Link": self.reportLink}
+
+    def fromdict(self, item):
+        self.screenshot = item.val()["UrlScan"]["Screenshot"]
+        self.lastAnalysed = item.val()["UrlScan"]["Last Analysed"]
+        self.contentType = item.val()["UrlScan"]["Content Type"]
+        self.documentType = item.val()["UrlScan"]["Document Type"]
+        self.finalUrl = item.val()["UrlScan"]["Final URL"]
+        self.ipAddress = item.val()["UrlScan"]["IP Address"]
+        self.securityStatus = item.val()["UrlScan"]["Security Status"]
+        self.server = item.val()["UrlScan"]["Server"]
+        self.country = item.val()["UrlScan"]["Country"]
+        self.city = item.val()["UrlScan"]["City"]
+        self.registrar = item.val()["UrlScan"]["Registrar"]
+        self.registerDate = item.val()["UrlScan"]["Registrar Date"]
+        self.response = item.val()["UrlScan"]["Response"]
+        self.reportLink = item.val()["UrlScan"]["Report Link"]
+
+        return Urlscan(self.screenshot, self.lastAnalysed, self.contentType, self.documentType, self.finalUrl, self.ipAddress, self.securityStatus, self.server, 
+        self.country, self.city, self.registrar, self.registerDate, self.response, self.reportLink)
 
     # Retrieve information
     def retrieve(self, query, key):
@@ -921,6 +1014,32 @@ class VtDomain(Virustotal):
                 "Report Link": self.reportLink, "Domain": self.domain, "registrar": self.registrar, "Categories": category, "Date Created": self.dateCreated, 
                 "Last Modified": self.lastModified, "Cert Started": self.certStarted, "Cert Expires": self.certExpires, "Cert Issuer": self.certIssuer}
 
+    def fromdict(self, item):
+        self.cleanDetection = item.val()["Virustotal"]["Clean Detection"]
+        self.malDetection = item.val()["Virustotal"]["Malicious Detection"]
+        self.undetected = item.val()["Virustotal"]["Undetected"]
+        self.susDetection = item.val()["Virustotal"]["Suspicious Detection"]
+        if self.malDetection > 0 or self.susDetection > 0:
+            self.detections = item.val()["Virustotal"]["Detections"]
+        self.firstSubmitted = item.val()["Virustotal"]["First Submitted"]
+        self.lastSubmitted = item.val()["Virustotal"]["Last Submitted"]
+        self.totalSubmissions = item.val()["Virustotal"]["Total Submissions"]
+        self.reportLink = item.val()["Virustotal"]["Report Link"]
+        self.domain = item.val()["Virustotal"]["Domain"]
+        if "Categories" in item.val()["Virustotal"]:
+            self.categories = item.val()["Virustotal"]["Categories"]
+        if "Registrar" in item.val()["Virustotal"]:
+            self.registrar = item.val()["Virustotal"]["Registrar"]
+        self.dateCreated = item.val()["Virustotal"]["Date Created"]
+        self.lastModified = item.val()["Virustotal"]["Last Modified"]
+        self.certStarted = item.val()["Virustotal"]["Cert Started"]
+        self.certExpires = item.val()["Virustotal"]["Cert Expires"]
+        self.certIssuer = item.val()["Virustotal"]["Cert Issuer"]
+
+        return VtDomain(self.cleanDetection, self.malDetection, self.undetected, self.susDetection, self.detections, self.firstSubmitted, self.lastSubmitted, 
+        self.totalSubmissions, self.vtGraph, self.reportLink, self.domain, self.categories, self.registrar, self.dateCreated, self.lastModified, self.certStarted,
+        self.certExpires, self.certIssuer)
+
     # Retrieve information
     def retrieve(self, query, key):
         if key == "":
@@ -1065,6 +1184,33 @@ class VtFileHash(Virustotal):
                 "Magic": self.magic, "Product": self.product, "Product Description": self.productDesc, "Product Version": self.productVersion, "MD5": self.md5, 
                 "SHA1": self.sha1, "SHA256": self.sha256}
 
+    def fromdict(self, item):
+        self.cleanDetection = item.val()["Virustotal"]["Clean Detection"]
+        self.malDetection = item.val()["Virustotal"]["Malicious Detection"]
+        self.undetected = item.val()["Virustotal"]["Undetected"]
+        self.susDetection = item.val()["Virustotal"]["Suspicious Detection"]
+        if self.malDetection > 0 or self.susDetection > 0:
+            self.detections = item.val()["Virustotal"]["Detections"]
+        self.firstSubmitted = item.val()["Virustotal"]["First Submitted"]
+        self.lastSubmitted = item.val()["Virustotal"]["Last Submitted"]
+        self.totalSubmissions = item.val()["Virustotal"]["Total Submissions"]
+        self.reportLink = item.val()["Virustotal"]["Report Link"]
+        self.description = item.val()["Virustotal"]["Description"]
+        self.knownNames = item.val()["Virustotal"]["Known Names"]
+        self.fileSize = item.val()["Virustotal"]["File Size"]
+        self.threatLabel = item.val()["Virustotal"]["Threat Label"]
+        self.magic = item.val()["Virustotal"]["Magic"]
+        self.product = item.val()["Virustotal"]["Product"]
+        self.productDesc = item.val()["Virustotal"]["Product Description"]
+        self.productVersion = item.val()["Virustotal"]["Product Version"]
+        self.md5 = item.val()["Virustotal"]["MD5"]
+        self.sha1 = item.val()["Virustotal"]["SHA1"]
+        self.sha256 = item.val()["Virustotal"]["SHA256"]
+
+        return VtFileHash(self.cleanDetection, self.malDetection, self.undetected, self.susDetection, self.detections, self.firstSubmitted, self.lastSubmitted, 
+        self.totalSubmissions, self.vtGraph, self.reportLink, self.description, self.knownNames, self.fileSize, self.threatLabel, self.magic, self.product, 
+        self.productDesc, self.productVersion, self.md5, self.sha1, self.sha256)
+
     # Retrieve information
     def retrieve(self, query, key):
         if key == "":
@@ -1196,6 +1342,27 @@ class VtIP(Virustotal):
                 "Report Link": self.reportLink, "Network": self.network, "Country": self.country, "Continent": self.continent, "ASO": self.aso, "ASN": self.asn, 
                 "Registrar": self.registrar}
 
+    def fromdict(self, item):
+        self.cleanDetection = item.val()["Virustotal"]["Clean Detection"]
+        self.malDetection = item.val()["Virustotal"]["Malicious Detection"]
+        self.undetected = item.val()["Virustotal"]["Undetected"]
+        self.susDetection = item.val()["Virustotal"]["Suspicious Detection"]
+        if self.malDetection > 0 or self.susDetection > 0:
+            self.detections = item.val()["Virustotal"]["Detections"]
+        self.firstSubmitted = item.val()["Virustotal"]["First Submitted"]
+        self.lastSubmitted = item.val()["Virustotal"]["Last Submitted"]
+        self.totalSubmissions = item.val()["Virustotal"]["Total Submissions"]
+        self.reportLink = item.val()["Virustotal"]["Report Link"]
+        self.network = item.val()["Virustotal"]["Network"]
+        self.country = item.val()["Virustotal"]["Country"]
+        self.continent = item.val()["Virustotal"]["Continent"]
+        self.aso = item.val()["Virustotal"]["ASO"]
+        self.asn = item.val()["Virustotal"]["ASN"]
+        self.registrar = item.val()["Virustotal"]["Registrar"]
+
+        return VtIP(self.cleanDetection, self.malDetection, self.undetected, self.susDetection, self.detections, self.firstSubmitted, self.lastSubmitted, 
+        self.totalSubmissions, self.vtGraph, self.reportLink, self.network, self.country, self.continent, self.aso, self.asn, self.registrar)
+
     # Retrieve information
     def retrieve(self, query, key):
         if key == "":
@@ -1324,6 +1491,28 @@ class VtUrl(Virustotal):
                 "Detections": detect, "First Submitted": self.firstSubmitted, "Last Submitted": self.lastSubmitted, "Total Submissions": self.totalSubmissions, 
                 "Report Link": self.reportLink, "Categories": category, "Final URL": self.finalUrl, "Site Title": self.siteTitle, "Content Type": self.contentType, 
                 "Server": self.server, "Response": self.response}
+
+    def fromdict(self, item):
+        self.cleanDetection = item.val()["Virustotal"]["Clean Detection"]
+        self.malDetection = item.val()["Virustotal"]["Malicious Detection"]
+        self.undetected = item.val()["Virustotal"]["Undetected"]
+        self.susDetection = item.val()["Virustotal"]["Suspicious Detection"]
+        if self.malDetection > 0 or self.susDetection > 0:
+            self.detections = item.val()["Virustotal"]["Detections"]
+        self.firstSubmitted = item.val()["Virustotal"]["First Submitted"]
+        self.lastSubmitted = item.val()["Virustotal"]["Last Submitted"]
+        self.totalSubmissions = item.val()["Virustotal"]["Total Submissions"]
+        self.reportLink = item.val()["Virustotal"]["Report Link"]
+        if "Categories" in item.val()["Virustotal"]:
+            self.categories = item.val()["Virustotal"]["Categories"]
+        self.finalUrl = item.val()["Virustotal"]["Final URL"]
+        self.siteTitle = item.val()["Virustotal"]["Site Title"]
+        self.contentType = item.val()["Virustotal"]["Content Type"]
+        self.server = item.val()["Virustotal"]["Server"]
+        self.response = item.val()["Virustotal"]["Response"]
+
+        return VtUrl(self.cleanDetection, self.malDetection, self.undetected, self.susDetection, self.detections, self.firstSubmitted, self.lastSubmitted, 
+        self.totalSubmissions, self.vtGraph, self.reportLink, self.categories, self.finalUrl, self.siteTitle, self.contentType, self.server, self.response)
     
     # Retrieve information
     def retrieve(self, query, key):
