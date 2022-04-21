@@ -8,7 +8,7 @@ import webbrowser, hashlib, datetime, pyrebase
 app = Flask(__name__)
 
 config = {
-    "apiKey": "AIzaSyAzydxPiVakaZdrKMZ5e2aqXsOxXKeb6CM",
+    "apiKey": "API-KEY",
     "authDomain": "isidore-5c6c3.firebaseapp.com",
     "databaseURL": "https://isidore-5c6c3-default-rtdb.europe-west1.firebasedatabase.app/",
     "projectId": "isidore-5c6c3",
