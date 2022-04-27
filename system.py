@@ -1,8 +1,14 @@
-import re, os, datetime, pyrebase, dataclasses
-from api import HybridAnalysis, Urlscan, AbuseIP, Greynoise, IPinfo, Shodan, VtUrl, VtIP, VtDomain, VtFileHash
+import re, datetime, pyrebase, dataclasses
+from apis.virustotal import VtUrl, VtIP, VtDomain, VtFileHash
+from apis.urlscan import Urlscan
+from apis.hybridanalysis import HybridAnalysis
+from apis.abuseip import AbuseIP
+from apis.greynoise import Greynoise
+from apis.shodan import Shodan
+from apis.ipinfo import IPinfo
 
 config = {
-    "apiKey": "AIzaSyAzydxPiVakaZdrKMZ5e2aqXsOxXKeb6CM",
+    "apiKey": "AIzaSyABZswzs9cGei48yTNTNCcSmBupp5Gsukk",
     "authDomain": "isidore-5c6c3.firebaseapp.com",
     "databaseURL": "https://isidore-5c6c3-default-rtdb.europe-west1.firebasedatabase.app/",
     "projectId": "isidore-5c6c3",
@@ -15,6 +21,7 @@ firebase = pyrebase.initialize_app(config)
 db = firebase.database()
 auth = firebase.auth()
 
+# Called on user log in
 def initialise(userSettings, user):
     # Read in API keys from text file
 
@@ -79,10 +86,12 @@ class DomainQuery(Query):
     def setUrlscan(self, urlscan):
         self.urlscan = urlscan
 
+    # Converts object to dictionary
     def todict(self):
         return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
         "Virustotal": self.virustotal.todict(), "UrlScan": self.urlscan.todict()}
 
+    # Converts dictionary to object
     def fromdict(self, item):
         vt = VtDomain("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
         us = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
@@ -106,6 +115,7 @@ class DomainQuery(Query):
         else:
             return True
 
+    # Generates HTML for Domain page
     def generateHTML(self, fresh, virustotal, urlscan, count):
         if count == 0:
             status = " active"
@@ -114,6 +124,7 @@ class DomainQuery(Query):
         html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '<br>This information is from ' + fresh + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span> </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + urlscan + '</section> </div> </div>'
         return html
 
+    # Generates charts for Domain page
     def generateChart(self, virustotal, count):
         chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script>'
         return chart
@@ -142,10 +153,12 @@ class FileHashQuery(Query):
     def setHybridAnalysis(self, hybridAnalysis):
         self.hybridAnalysis = hybridAnalysis
 
+    # Converts object to dictionary
     def todict(self):
         return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
         "Virustotal": self.virustotal.todict(), "Hybrid Analysis": self.hybridAnalysis.todict()}
 
+    # Converts dictionary to object
     def fromdict(self, item):
         vt = VtFileHash("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
         ha = HybridAnalysis("", "", "", "", "", "", "", "")
@@ -164,6 +177,7 @@ class FileHashQuery(Query):
         else:
             return True
 
+    # Generates HTML for Filehash page
     def generateHTML(self, fresh, virustotal, hybridanalysis, count):
         if count == 0:
             status = " active"
@@ -172,6 +186,7 @@ class FileHashQuery(Query):
         html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '<br>This information is from ' + fresh + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span> </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + hybridanalysis + '</section> </div> </div>'
         return html
 
+    # Generates chart for Filehash page
     def generateChart(self, virustotal, count):
         chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script>'
         return chart
@@ -215,11 +230,13 @@ class IPQuery(Query):
     def setIPInfo(self, ipinfo):
         self.ipInfo = ipinfo
 
+    # Converts object to dictionary
     def todict(self):
         return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
         "Virustotal": self.virustotal.todict(), "AbuseIP": self.abuseIP.todict(), "Greynoise": self.greynoise.todict(), 
         "Shodan": self.shodan.todict(), "IPinfo": self.ipInfo.todict()}
 
+    # Converts dictionary to object
     def fromdict(self, item):
         vt = VtIP("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
         aip = AbuseIP("", "", "", "", "", "", "", "", "", "", "", "")
@@ -249,6 +266,7 @@ class IPQuery(Query):
         else:
             return True
 
+    # Generates HTML for IP page
     def generateHTML(self, fresh, virustotal, abuseIP, greynoise, shodan, ipInfo, count):
         if count == 0:
             status = " active"
@@ -258,6 +276,7 @@ class IPQuery(Query):
         
         return html
 
+    # Generates charts for IP page
     def generateChart(self, virustotal, abuseIp, count):
         chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script><script> am4core.useTheme(am4themes_animated); var chart2 = am4core.create("chart2div' + str(count) + '", am4charts.XYChart3D); chart2.data = [{"confidence": "Confidence", "percent":' + str(abuseIp.abuseConfidence[:-1]) + '}]; var categoryAxis = chart2.yAxes.push(new am4charts.CategoryAxis()); categoryAxis.dataFields.category = "confidence"; var  valueAxis = chart2.xAxes.push(new am4charts.ValueAxis()); valueAxis.title.text = "Confidence of Abuse (%)"; valueAxis.max = 100; valueAxis.min = 0; var series = chart2.series.push(new am4charts.ColumnSeries3D()); series.dataFields.valueX = "percent"; series.dataFields.categoryY = "confidence"; series.name = "Confidence"; series.columns.template.tooltipText = "Confidence: {percent}%"; </script>'
         
@@ -292,10 +311,12 @@ class UrlQuery(Query):
     def setHybridAnalysis(self, hybridAnalysis):
         self.hybridAnalysis = hybridAnalysis
 
+    # Converts object to dictionary
     def todict(self):
         return {"ID": self.qId, "Query": self.query, "Submission Time": self.submissionTime, "Query Type": self.queryType, 
         "Virustotal": self.virustotal.todict(), "UrlScan": self.urlscan.todict(), "Hybrid Analysis": self.hybridAnalysis.todict()}
 
+    # Converts dictionary to object
     def fromdict(self, item):
         vt = VtUrl("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "")
         us = Urlscan("", "", "", "", "", "", "", "", "", "", "", "", "", "")
@@ -331,7 +352,7 @@ class UrlQuery(Query):
         else:
             return True
 
-    
+    # Generates HTML for URL page
     def generateHTML(self, fresh, virustotal, urlscan, hybridAnalysis, count):
         if count == 0:
             status = " active"
@@ -340,6 +361,7 @@ class UrlQuery(Query):
         html = '<div class="carousel-item' + status + '"><div><h3> <b>Submission: </b>' + self.query + '<br><b> Date: </b>' + datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '<br>This information is from ' + fresh + '</h3><br> <center><a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="prev"><i class="fas fa-long-arrow-alt-left"></i> Previous</a> <span>            </span> <a style="background-color: #0E4F61; color: white; width: 10em;" role="button" href="#services" class="btn btn btn-lg"  data-slide="next">Next <i class="fas fa-long-arrow-alt-right"></i></a><center> <br></div>  <div class="row"> <section class="col-lg-6 connectedSortable ui-sortable">' + virustotal + '</section> <section class="col-lg-6 connectedSortable ui-sortable">' + urlscan + hybridAnalysis + '</section> </div> </div>'
         return html
 
+    # Generates HTML for URL page
     def generateChart(self, virustotal, count):
         chart = '<script> am4core.ready(function() {am4core.useTheme(am4themes_animated); var chart = am4core.create("chartdiv' + str(count) + '", am4charts.PieChart3D); chart.innerRadius = am4core.percent(40); chart.data = [{"detection": "Clean", "count": ' + str(virustotal.cleanDetection) + ' }, {"detection": "Malicious", "count": ' + str(virustotal.malDetection) + ' }, {"detection": "Suspicious", "count": ' + str(virustotal.susDetection) + ' }, {"detection": "Undetected", "count": ' + str(virustotal.undetected) + ' }]; var pieSeries = chart.series.push(new am4charts.PieSeries3D()); pieSeries.dataFields.value = "count"; pieSeries.dataFields.category = "detection"; pieSeries.slices.template.stroke = am4core.color("#fff"); pieSeries.slices.template.strokeWidth = 2; pieSeries.slices.template.strokeOpacity = 1; pieSeries.labels.template.disabled = false; pieSeries.ticks.template.disabled = false; pieSeries.slices.template.states.getKey("hover").properties.shiftRadius = 0; pieSeries.slices.template.states.getKey("hover").properties.scale = 1.1; }); </script>'
         return chart
@@ -381,6 +403,7 @@ class Settings:
     def setIPInfoKey(self, key):
         self.ipInfoKey = key
 
+    # Converts object to dictionary
     def todict(self):
         return {"VTkey": self.virustotalKey, "USkey": self.urlscanKey, "HAkey": self.hybridAnalysisKey, "AIPkey": self.abuseIPKey, 
         "SHkey": self.shodanKey, "IPkey": self.ipInfoKey}
